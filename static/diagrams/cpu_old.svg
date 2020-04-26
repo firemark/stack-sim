@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created by diasvg.py -->
+<svg width="16.852cm" height="12.648cm" viewBox="4.591 8.940 16.852 12.648"
+ xmlns="http://www.w3.org/2000/svg"
+ xmlns:xlink="http://www.w3.org/1999/xlink">
+<!-- Layer: Background -->
+<g id="Background">
+<!-- Flowchart - Box -->
+<rect x="4.656" y="9.000" width="16.736" height="7.650" fill="#FFFFFF" stroke="#000000" stroke-width="0.100"  rx="0.000" />
+<text x="13.024" y="14.620"  fill="#000000" text-anchor="middle" font-size="0.80" font-family="sans" font-style="normal" font-weight="400">
+CPU</text>
+<!-- Flowchart - Box -->
+<rect x="4.641" y="9.000" width="7.609" height="1.900" fill="#FFFFFF" stroke="#000000" stroke-width="0.100"  rx="0.000" />
+<text x="8.445" y="10.145"  fill="#000000" text-anchor="middle" font-size="0.80" font-family="sans" font-style="normal" font-weight="400">
+STACK POINTER</text>
+<!-- Flowchart - Box -->
+<rect x="12.209" y="8.990" width="9.153" height="1.900" fill="#FFFFFF" stroke="#000000" stroke-width="0.100"  rx="0.000" />
+<text x="16.785" y="10.135"  fill="#000000" text-anchor="middle" font-size="0.80" font-family="sans" font-style="normal" font-weight="400">
+PROGRAM COUNTER</text>
+<!-- Flowchart - Box -->
+<rect x="4.656" y="10.900" width="16.705" height="1.900" fill="#FFFFFF" stroke="#000000" stroke-width="0.100"  rx="0.000" />
+<text x="13.009" y="12.045"  fill="#000000" text-anchor="middle" font-size="0.80" font-family="sans" font-style="normal" font-weight="400">
+REGISTERS</text>
+<!-- Standard - Text -->
+<!-- Standard - Text -->
+<!-- Flowchart - Box -->
+<rect x="13.993" y="19.638" width="6.400" height="1.900" fill="#FFFFFF" stroke="#000000" stroke-width="0.100"  rx="0.000" />
+<text x="17.193" y="20.783"  fill="#000000" text-anchor="middle" font-size="0.80" font-family="sans" font-style="normal" font-weight="400">
+MEMORY</text>
+<!-- Flowchart - Box -->
+<rect x="6.199" y="19.638" width="5.350" height="1.900" fill="#FFFFFF" stroke="#000000" stroke-width="0.100"  rx="0.000" />
+<text x="8.874" y="20.783"  fill="#000000" text-anchor="middle" font-size="0.80" font-family="sans" font-style="normal" font-weight="400">
+IO</text>
+<!-- Standard - Line -->
+<line x1="17.194" y1="19.414" x2="17.207" y2="16.874" stroke="#000000" stroke-width="0.100" />
+<polyline fill="none" stroke="#000000" stroke-width="0.100"  points="16.946,19.025 17.194,19.526 17.446,19.027 "/>
+<polyline fill="none" stroke="#000000" stroke-width="0.100"  points="17.455,17.263 17.208,16.762 16.955,17.261 "/>
+<!-- Standard - Line -->
+<line x1="8.871" y1="19.414" x2="8.843" y2="16.874" stroke="#000000" stroke-width="0.100" />
+<polyline fill="none" stroke="#000000" stroke-width="0.100"  points="8.617,19.029 8.873,19.526 9.117,19.023 "/>
+<polyline fill="none" stroke="#000000" stroke-width="0.100"  points="9.097,17.259 8.842,16.762 8.597,17.265 "/>
+</g>
+</svg>

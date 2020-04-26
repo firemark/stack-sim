@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+{% set title = "Start" %}
+{% block content %}
+<p>
+    Na starcie chciałbym zaznaczyć, że przykłady są dla poczatkujących programistów obojętnego języka,
+    którzy mają pojęcia co to są zmienne, stringi oraz pętle.
+</p>
+<p>
+    W kilku przykładach zamierzam pokazać jak działa pamięć w programach w bardzo podstawowym zakresie.
+    Odrazu chciałbym zaznaczyć, że implementacja pamięci może się znacznie różnić w innych architekturach,
+    więc przykłady nie będą odzwierciedlały rzeczywistego działania - możemy uznać, że dla <i>dobra</i>
+    podstaw, przykłady będą <i>„fałszywe”</i> w małym stopniu.
+</p>
+<p>
+    Przykłady nie mają zamiaru nauczenia języka C - sam język C zawiera sporo dodatkowej składni, 
+    makr oraz sporo funkcji z biblioteki standardowej czy również sztuki kompilatorów 
+    (jak pozbywanie się niepotrzebnych zmiennych). 
+    Będziemy operować na bardzo prostej składki, krok po kroku.
+</p>
+<p>
+    Przykłady też nie będą pokazywać działanie współczesnych procesorów - 
+    dlatego że są <strong> zbyt skomplikowane. </strong> Zacznijmy od podstawowego <i>„komputera”</i>:
+</p>
+<p class="center">
+    <img src="static/diagrams/cpu_old.svg" width="40%" />
+</p>
+<p>
+    Nasz <i>„komputer”</i> składa się z 3 elementów:
+    <ol>
+        <li><b>CPU</b> - procesor; jednostka do obliczeń i rządzenia komputerem przez rozkazy</li>
+        <li><b>Memory</b> - stąd odczytujemy dane oraz kod do CPU</li>
+        <li><b>IO</b> - można rzec „cokolwiek” co się komunikuje - modem, gpu, dysk, diody, czujniki etc.</li>
+    </ol>
+    Warto też opisać co w sobie ma CPU:
+    <ol>
+        <li>
+            <b>Rejestry</b> - komórki pamięci które są najbliżej dla procesora - 
+            dostęp do nich jest najszybszy (kilka cyklów taktowania zamiast kilkadziesiąt). 
+            Różne architektury procesorów mają różną ilość rejestrów, AVR ma np. 32 rejestry; 
+            8086 (z którego wywodzi się cała rodzina x86, z którego pewnie teraz ty korzystasz),
+            posiada zaś 4 rejestry arytmetyczne (do obliczeń) oraz 4 rejestry wskaźnikowe (o tym później).
+        </li>
+        <li>
+            <b>Stack Pointer</b> - w skrócie <b>SP</b>, specjalny rejestr do wskazania na jakiej komórce pamięci jest ostatni element stosu (o stosie będzie już za chwilkę, po prostu zapamiętaj że taki sobie istnieje rejestrik)
+        </li>
+        <li> 
+            <b>Program Counter</b> - w skrócie <b>PC</b>, specjalny rejestr który wskazuje jaką komórkę ma wykonać procesor jako rozkaz. W naszych przykładach Program counter będzie wskazywać na linijki naszego kodu (co nie jest do końca prawdą, ponieważ Program Counter wskazuje na początek rozkazu w pamięci, a rozkazy mogą mieć różne długości, ale to już trudniejszy temat.)
+        </li>
+    </ol>
+</p>
+<hr />
+
+<p>
+    A co zawiera w sobie współczesny procesor?
+</p>
+<p class="center">
+    <img src="static/diagrams/cpu_new.svg" width="40%" />
+</p>
+<p>
+    Dodatkowe elementy takie jak: 
+    <ol>
+        <li><b>GPU</b> - takie czasy gdy GPU robi lepsze obliczenia niż CPU, więc może przejąć obliczenia</li>
+        <li>
+            <b>DMA</b> - Direct Memory Access - w starych architekturach dostęp do pamięci miał tylko CPU, więc jak chcieliśmy skopiować dane z pamięci do dysku oraz na odwrót to musieliśmy to robić przez procesor (który i tak wykonuje inne rzeczy) i to szybkich operacji raczej nie należało, dlatego wymyślono <b>DMA</b> by dodatkowe urządzenia miały bezpośredni dostęp do pamięci - przez co dysk czy GPU nie musi czekać na CPU tylko odrazu dobija się do pamięci. 
+        </li>
+    </ol>
+    I teraz Procesor:
+    <ol>
+        <li><b>Cache</b> - bo dostęp do pamięci jest zbyt wolny, więc CPU wrzuca sobie kawałki kodu by mieć szybszy dostęp</li>
+        <li><b>Multicore</b> - bo można wykonywać wiele obliczeń równolegle, no czemu nie!</li>
+        <li>Mechanizmy jak <b>Branch Predictor</b> które przewidują jakie rozkazy będą kolejne i już się <i>„przygotowywuje się”</i> do ich wykonania</li>
+        <li><b>Dodatkowe rejestry</b> Jak np. SIMD - rejestry o bardzo dużej długości które mogą wykonać N obliczeń naraz (idealnie do przetwarzania muzyki/obrazów/grafiki 3D)</li>
+    </ol>
+    Myślę, że przekonałem Cię, że nauka na nowszych architekturach nie będzie przyjemna na początek.
+</p>
+
+<p>
+    Ok, ale już koniec z architekturami procesorów! opowiedzmy sobie jak działa pamięć w programie.
+    Najlepiej sobie wyobrazić pamięć, że to jest bardzo duża tablica z dwoma kolumnami - adres oraz wartość 
+    (liczba binarna).
+    Pod każdy adres mamy komórkę pamięci (najczęściej 8 bitów), i jedynie co procesor może zrobić to aktulizować wartości pod danymi adresami (symulacja to wyjaśni bardziej, jeszcze chwilkę!)
+</p>
+<hr />
+<p>
+    Program w nowszych procesorach, dostaje przydział pamięci w tzw segmentach - 
+    jeżeli poprosimy o dane z innego obszaru pamięci to jądro systemu grzecznie poinformuje, że nie mamy dostępu i <b>wyłączy nam program</b>. I uwierz mi - to jest najlepsze co może zrobić dla twojego programu.
+</p>
+<p>
+    Segmenty w naszym programie są typowo trzy (i do tego potrzebujemy 3 wskaźniki):
+    <ol>
+        <li>
+            Segment <b>TEXT</b> albo inaczej nazwany <b>CODE</b> - 
+            segment gdzie znajduje się nasz kod w postaci maszynowej, zrozumiałe dla naszego procesora. 
+            W tym miejscu są nasze funkcje, pętle etc. ale nie dane.
+        </li>
+        <li>
+            Segment <b>STACK</b> - stos, tutaj wrzucamy nasze tymczasowe zmienne, które nasz kod może modyfikować. Jest to też dobre miejsce dla alokowania dynamicznej pamięci.
+        </li>
+        <li>
+            Segment <b>DATA</b> - segment na nasze dane po uruchomieniu programu, tutaj się znajdują globalne oraz statyczne zmienne (dostępne dla każdej funkcji).
+        </li>
+    </ol>
+    Więcej tutaj: <a href="https://en.wikipedia.org/wiki/Data_segment">https://en.wikipedia.org/wiki/Data_segment</a>
+</p>
+<hr />
+<p>
+    OK! w końcu dotarliśmy do pierwszego przykładu: stos. 
+    Stos jest tzw. kolejką FILO - <i>First In, Last Out</i>. Na stos wrzucamy dane (<i>push</i>) oraz wyciągamy (<i>pop</i>). 
+    Jak zauważycie głównie to polega na zmienianiu rejestru <b>SP</b> - jest to tak naprawdę <i>„licznik”</i> ile jest już elementów oraz wskaźnik na kolejny element. Warto też wspomnieć, że pamięć się nie zeruje - po prostu zmniejszamy wskaźnik lub zastępujemy innymi wartościami.
+</p>
+<p>
+    Nasz przykład jest pseudo-językiem. 
+    W przykładzie chcemy po kolei wrzucić 3 owoce oraz wrzucić ostatni owoc do rejestru <b>VALUE</b>.
+</p>
+
+<div id='stack-fun'></div>
+<hr />
+
+<p> Ale to już koniec owoców - kolejne przykłady będą operować na liczbach. Litości zero. </p>
+
+<div id='stack'></div>
+{% endblock %}
+{% block script %}
+<script>
+new Example(byId('stack-fun'), [
+    { action: 'set $SP 0' ,                    line: 'BEGIN' },
+    { action: 'set &$SP 🍎; add $SP 1',        line: 'push 🍎' },
+    { action: 'set &$SP 🍌; add $SP 1',        line: 'push 🍌' },
+    { action: 'set &$SP 🍇; add $SP 1',        line: 'push 🍇' },
+    { action: 'set $VALUE ^&$SP-1; sub $SP 1', line: 'pop to VALUE' },
+], [ 
+    new StackComponent({ pointer: 'SP', start: 0, size: 8 }),
+    new CodeComponent(),
+], {
+    stackSize: 8,
+    stackLabels: {
+        VALUE: { index: 6, hideAddr: true },
+        SP:    { index: 7, hideAddr: true },
+    },
+    parseVal: function (val) {
+        var intVal = parseInt(val);
+        return isNaN(intVal) ? val : intVal;
+    },
+});
+
+new Example(byId('stack'), [
+    { action: 'set $SP 0' ,                    line: 'BEGIN' },
+    { action: 'set &$SP 111; add $SP 1',       line: 'push 111' },
+    { action: 'set &$SP 222; add $SP 1',       line: 'push 222' },
+    { action: 'set &$SP 333; add $SP 1',       line: 'push 333' },
+    { action: 'set $VALUE ^&$SP-1; sub $SP 1', line: 'pop to VALUE' },
+], [ 
+    new StackComponent({ pointer: 'SP', start: 0, size: 8 }),
+    new CodeComponent(),
+], {
+    stackSize: 8,
+    stackLabels: {
+        VALUE: { index: 6, hideAddr: true },
+        SP:    { index: 7, hideAddr: true },
+    }
+});
+</script>
+{% endblock %}

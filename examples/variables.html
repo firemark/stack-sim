@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% set title = "Zmienne" %}
+{% block content %}
+<p>
+    Jak już jesteśmy po omówieniu pamięci oraz stosu możemy przejść do zmiennych w C.
+</p>
+<p>
+    W trakcie uruchomienia funkcji w C program jest w stanie zarezerwować tyle ile potrzebuje. 
+    Na naszym przykładzie potrzebujemy 3 komórek pamięci dla zmiennych x, y, z. 
+    Ustaliliśmy, że chcemy by zmienne miały typ <b>char</b>.
+</p>
+<p>
+    <b>char</b> oznacza że to jest najmniejsza komórka pamięci (najczęściej 8bitów) którą może operować CPU.
+    Dla procesora jest to ważne bo wtedy wiadomo jakie chcemy wykonać rozkazy 
+    (dla różnych typów są inne rozkazy, tak w zaokrągleniu problemu) 
+    oraz ile mamy pamięci zarezerwować dla typu 
+    (np. <b>int</b> dla x86 oraz 64x86  posiada 32bity czyli 4 bajty, 
+    czyli potrzebujemy 4 komórki pamięci na zapisanie liczby typu <b>int</b>)
+</p>
+<hr />
+<p>
+    O samych typach będzie kiedyś indziej, oraz dla ułatwienia sobie przykładów, 
+    uznajmy, że jedna zmienna = jedna komórka pamięci, obojętnie jakiego rozmiaru jest typ.
+</p>
+<div id='vars'></div>
+<hr />
+<p>
+    Można zauważyć, że dla kompilatora, zmienna to tak naprawdę to adres do komórki pamięci, 
+    którą może modyfikować 
+    (pod warunkiem, że nie zostanie skasowana w czasie optymalizacji, 
+    w naszym przykładzie zmienne x oraz y są zbyteczne, bo kompilator jest w stanie obliczyć sam wartość z).
+</p>
+{% endblock %}
+{% block script %}
+<script>
+new Example(byId('vars'), [
+    { action: 'set $x 42',              line: 'char x = 42;' },
+    { action: 'set $y 64',              line: 'char y = 64;' },
+    { action: 'set $z &$x; add $z &$y', line: 'char z = x + y;' },
+], [ 
+    new StackComponent(),
+    new CodeComponent(),
+], {
+    stackLabels: {
+        x: 0x2000,
+        y: 0x2001,
+        z: 0x2002,
+    }
+});
+</script>
+{% endblock %}

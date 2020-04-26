@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% set title = "Pętle" %}
+{% block content %}
+<p>
+    W języku C mamy w praktyce 2 pętle (są 3, ale pętla <b>do-while</b> jest bardzo rzadka i nie mam czasu by ją omówić).
+</p>
+<hr />
+<p>
+    Pierwsza pętla jest to <b>while</b>, który wykonuje taki algorytm: 
+    <ol>
+        <li>Sprawdza czy warunek jest poprawny 
+            (dokładniej w C to sprawdzenie czy warunek jest <b>niezerowy</b>)</li>
+        <li>Jeśli tak to wykonaj kod pętli oraz wróć do punktu 0 
+            (w praktyce, skocz do miejsca sprawdzającego warunek)</li>
+        <li>Jeśli nie to przerwij pętlę i przejdź dalej</li>
+    </ol>
+</p>
+<p> 
+    Pierwszy przykład dodaje 3 razy liczbę 20
+</p>
+<div id='while-loop-0'></div>
+<hr />
+<p> 
+    Jak wspomniałem wcześniej, warunek pętli ma być niezerowy i możemy to wykorzystać 
+    sprawdzając czy warunek pętli będzie zerowy w kolejnym przykładzie.
+</p>
+<div id='while-loop-1'></div>
+<hr />
+<p> 
+    Ale jednak o wiele bardziej praktyczniejsza jest pętla <b>for</b>, która składa się z 3 rzeczy:
+    <ol>
+        <li>Inicjalizacja</li>
+        <li>Warunek sprwadzający</li>
+        <li>Iteracja (wykonanie kodu po skończeniu kodu w pętli</li>
+    </ol>
+</p>
+<p>
+    Pętlę <b>for</b> możemy zmienić na petlę <b>while</b>
+    <pre><code class="language-c">for(INIT; WARUNEK; ITER) { KOD; }</code></pre>
+    na:
+    <pre><code class="language-c">INIT;
+while(WARUNEK) { KOD; ITER; }</code></pre>
+</p>
+<div id='for-loop'></div>
+{% endblock %}
+{% block script %}
+<script>
+new Example(byId('while-loop-0'), [
+    { action: 'set $cnt 0',                      line: 'int counter = 0;' },
+    { action: 'set $sum 0',                      line: 'int sum = 0;' },
+    { action: 'if< &$cnt 3 ? +1 +3; add $cnt 1', line: 'while (counter++ < 3) {' },
+    { action: 'add $sum 20',                     line: '    sum += 20;' },
+    { action: 'rjmp -3',                         line: '}' },
+    { action: 'nop',                             line: '' },
+], [ 
+    new StackComponent(),
+    new CodeComponent(),
+], {
+    stackLabels: {
+        cnt: 0x2000,
+        sum: 0x2001,
+    }
+});
+
+new Example(byId('while-loop-1'), [
+    { action: 'set $cnt 3',                      line: 'int counter = 3;' },
+    { action: 'set $sum 0',                      line: 'int sum = 0;' },
+    { action: 'if! &$cnt 0 ? +1 +3; sub $cnt 1', line: 'while (counter--) {' },
+    { action: 'add $sum 20',                     line: '    sum += 20;' },
+    { action: 'rjmp -3',                         line: '}' },
+    { action: 'nop',                             line: '' },
+], [ 
+    new StackComponent(),
+    new CodeComponent(),
+], {
+    stackLabels: {
+        cnt: 0x2000,
+        sum: 0x2001,
+    }
+});
+
+new Example(byId('for-loop'), [
+    { action: 'set $sum 0',                   line: 'int sum = 0;' },
+    { action: 'nop',                          line: 'int i;' },
+    { firstAction: 'set $i 0', 
+      action: 'if< &$i 3 ? +1 +3',            line: 'for (i = 0; i < 3; i++) {' },
+    { action: 'add $sum 20',                  line: '    sum += 20;' },
+    { action: 'add $i 1; rjmp -3',            line: '}' },
+    { action: 'nop',                          line: '' },
+], [ 
+    new StackComponent(),
+    new CodeComponent(),
+], {
+    stackLabels: {
+        sum: 0x2000,
+        i: 0x2001,
+    }
+});
+</script>
+{% endblock %}

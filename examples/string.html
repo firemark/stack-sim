@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% set title = "String" %}
+{% block content %}
+<p>
+    Do kolejnego przykładu Musimy przyjąć dwie prawdy:
+    <ol>
+        <li>Znak jest liczbą (W przykładzie litera A to liczba 65 w systemie ASCII)</li>
+        <li>String to tablica znaków (czyli liczb) o nieznanej długości</li>
+    </ol>
+</p>
+<p>
+    I wystarczy tyle by zrozumieć działanie stringów (ale nie UTF8!).
+</p>
+<p>
+    Problemem stringów może być, że nie znamy na początku długości stringa. Rozwiązano ten problem tak, że na ostatnim elemencie dodaje się liczbę 0, która oznacza dla funkcji związanych ze stringiem, że tu jest koniec Stringa. Dzięki temu możemy wysyłać znaki strumieniowo np. odczytując dane z dysku czy podczas połączenia z serwerem.
+</p>
+<p>
+    W tym miejscu chciałbym nie omawiać biblioteki standardowej <b>string.h</b>, tylko samą budowę - kolejny przykład o sprawdzeniu długości stringa.
+</p>
+<div id='string'></div>
+<hr />
+<p>
+A tutaj trudniejszy przykład - zmienianie małe litery na duże. <a href="http://www.asciitable.com">W tym linku</a> jest rozpiska znaków ASCII.
+</p>
+<div id='string-uppercase'></div>
+<hr />
+{% endblock %}
+{% block script %}
+<script>
+new Example(byId('string'), [
+    { action: 'set $arr+0 :A; set $arr+1 :B; set $arr+2 :C; set $arr+3 0', 
+                                              line: 'char arr[] = "ABC";' },
+    { action: 'nop',                          line: "char arr[] = {'A', 'B', 'C', 0};" },
+    { action: 'set $len 0',                   line: 'int len = 0;' },
+    { action: 'set $p $arr',                  line: 'char* p = arr;' },
+    { action: 'if! ^&$p 0 ? +1 +4',           line: 'while(*p) {' },
+    { action: 'add $len 1',                   line: '    len++;' },
+    { action: 'add $p 1',                     line: '    p++;' },
+    { action: 'rjmp -4',                      line: '}' },
+    { action: 'nop',                          line: '' },
+], [ 
+    new StackComponent({ pointer: 'p' }),
+    new CodeComponent(),
+], {
+    stackLabels: {
+        len: 0x2000,
+        p: { index: 0x2001, render: 'hex' },
+        arr: { index: 0x2002, size: 4, render: 'chr' },
+    }
+});
+
+new Example(byId('string-uppercase'), [
+    { action: 'set $arr+0 :a; set $arr+1 :b; set $arr+2 :c; set $arr+3 0', 
+                                              line: 'char arr[] = "abc";' },
+    { action: 'nop',                          line: 'char c;' },
+    { action: 'set $p $arr',                  line: 'char* p = arr;' },
+    { action: 'if! ^&$p 0 ? +1 +4',           line: 'while(*p) {' },
+    { action: 'add &$p :A; sub &$p :a',       line: "    *p -= 'a' - 'A';" },
+    { action: 'add $p 1',                     line: '    p++;' },
+    { action: 'rjmp -4',                      line: '}' },
+    { action: 'nop',                          line: '' },
+], [ 
+    new StackComponent({ pointer: 'p' }),
+    new CodeComponent(),
+], {
+    stackLabels: {
+        c: 0x2000,
+        p: { index: 0x2001, render: 'hex' },
+        arr: { index: 0x2002, size: 4, render: 'chr' },
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% set title = "Tablice" %}
+{% block content %}
+<p>
+    Tablice w C są mniej intuicyjne, niż powinny być, 
+    bo procesor nie jest w stanie operować na całej tablicy, tylko na komórce pamięci.
+</p>
+<p>
+    Więc tak naprawdę tablica w C to jest informacja dla kompilatora ile ma zarezerwować komórek pamięci
+    oraz ustala na tę zmienną wskaźnik pierwszego elementu więc w praktyce… tablica to wskaźnik na pierwszy element. Zapamiętajcie bo to bardzo ważne w C.
+</p>
+<p>
+Pamiętacie przykład z 3 zmiennymi <b>x</b>, <b>y</b> oraz <b>z</b>? tu macie taki sam tylko na tablicy 3-elementowej. Dla stosu nie ma żadnej różnicy czy zadeklarujemy 3 zmienne tego samego typu czy tablicę 3-elementową.
+</p>
+<div id='array'></div>
+<hr />
+<p>
+    Przy użyciu pętli możemy np. podliczyć sumę elementów:
+</p>
+<div id='array-sum'></div>
+<hr />
+<p>
+    Przy użyciu pętli możemy też modyfikować elementy i … zrobić sobie krzywdę:
+</p>
+<div id='array-loop-evil'></div>
+    <p>
+    Zauważyliście co się stało? pętla sprawdzała o jeden element więcej, 
+    a tak jak wspomniałem na początku, zmienna z tablicą to wskaźnik na pierwszy element 
+    to nadpisaliśmy jedną zmienną, dokładnie zmienną <b>i</b> która jest stosowana do iteracji. 
+    Ze względu, że mamy warunek <b>!= 4</b>, do pętla wykonuje się dalej do czasu błędu 
+    (i to jest najlepsze co może się stać, bo wtedy wiemy że jest błąd, 
+    a nie błąd którzy gdzieś uszkadza nasz program albo inne miejsce w pamięci)
+</p>
+<hr />
+<p>
+    Dlatego jak robimy iterację po elementach, nie powinniśmy sprawdzać czy iterator jest nierowny liczbie elementów, tylko czy jest mniejszy od liczby elementów - jeżeli coś nam nadpisze zmienną <b>i</b>, na złą wartość to po prostu pętla się zakończy.
+</p>
+<div id='array-loop'></div>
+{% endblock %}
+{% block script %}
+<script>
+new Example(byId('array'), [
+    { action: 'nop',                                      line: 'char arr[3];' },
+    { action: 'set $arr+0 42',                            line: 'arr[0] = 42;' },
+    { action: 'set $arr+1 64',                            line: 'arr[1] = 64;' },
+    { action: 'set $arr+2 ^$arr+0; add $arr+2 ^$arr+1',   line: 'arr[2] = arr[0] + arr[1];' },
+], [ 
+    new StackComponent(),
+    new CodeComponent(),
+], {
+    stackLabels: {
+        arr: { index: 0x2000, size: 3 },
+    }
+});
+
+new Example(byId('array-sum'), [
+    { action: 'set $arr+0 1; set $arr+1 2; set $arr+2 3', 
+                                            line: 'int arr[3] = {1, 2, 3};' },
+    { action: 'set $sum 0',                 line: 'int sum = 0;' },
+    { action: 'nop',                        line: 'int i;' },
+    { firstAction: 'set $i 0', 
+      action: 'if< &$i 3 ? +1 +3',          line: 'for (i = 0; i < 3; i++) {' },
+    { action: 'add $sum ^$arr+&$i',         line: '    sum += arr[i];' },
+    { action: 'add $i 1; rjmp -3',          line: '}' },
+    { action: 'nop',                        line: '' },
+], [ 
+    new StackComponent({ 
+        pointer: 'i', 
+        pointerCallback: function(i) { return i + 0x2000; } 
+    }),
+    new CodeComponent(),
+], {
+    stackLabels: {
+        arr: { index: 0x2000, size: 3 },
+        sum: 0x2003 + 0,
+        i: 0x2003 + 1,
+    }
+});
+
+new Example(byId('array-loop'), [
+    { action: 'nop',                                line: 'int arr[3];' },
+    { action: 'nop',                                line: 'int i;' },
+    { firstAction: 'set $i 0', 
+      action: 'if< &$i 4 ? +1 +3',                  line: 'for (i = 0; i < 4; i++) {' },
+    { action: 'set $TMP &$i; mul $TMP 2; set $arr+&$i &$TMP',   
+        line: '    arr[i] = i*2;' },
+    { action: 'add $i 1; rjmp -3',                  line: '}' },
+    { action: 'nop',                                line: '' },
+], [ 
+    new StackComponent({ 
+        pointer: 'i', 
+        pointerCallback: function(i) { return i + 0x2000; } 
+    }),
+    new CodeComponent(),
+], {
+    stackLabels: {
+        arr: { index: 0x2000, size: 3 },
+        i: 0x2003,
+        TMP: { index: 0x2009, hideAddr: true },
+    }
+});
+
+new Example(byId('array-loop-evil'), [
+    { action: 'nop',                                line: 'int arr[3];' },
+    { action: 'nop',                                line: 'int i;' },
+    { firstAction: 'set $i 0', 
+      action: 'if! &$i 4 ? +1 +3',                  line: 'for (i = 0; i != 4; i++) {' },
+    { action: 'set $TMP &$i; mul $TMP 2; set $arr+&$i &$TMP',   
+        line: '    arr[i] = i*2;' },
+    { action: 'add $i 1; rjmp -3',                  line: '}' },
+    { action: 'nop',                                line: '' },
+], [ 
+    new StackComponent({ 
+        pointer: 'i', 
+        pointerCallback: function(i) { return i + 0x2000; } 
+    }),
+    new CodeComponent(),
+], {
+    stackLabels: {
+        arr: { index: 0x2000, size: 3 },
+        i: 0x2003,
+        TMP: { index: 0x2009, hideAddr: true },
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,16 @@
+<head>
+    <title>C simulator {% if title %}- {{ title }}{% endif %}</title>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="https://prismjs.com/themes/prism.css" />
+    <link rel="stylesheet" href="static/style.css" />
+</head>
+<body>
+    <h3>{{ title | default("Menu") }}</h3>
+    {% block content %}{% endblock %}
+</body>
+<script src="static/script.js" charset="UTF-8"></script>
+<script src="static/code_component.js" charset="UTF-8"></script>
+<script src="static/stack_component.js" charset="UTF-8"></script>
+{% block script %}{% endblock %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.20.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.20.0/components/prism-c.min.js"></script>

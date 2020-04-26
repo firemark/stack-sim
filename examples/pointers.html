@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% set title = "Wskaźniki" %}
+{% block content %}
+<p>
+    Jak już jesteśmy po etapie zmiennych, możemy teraz zachaczyć o podstawy wskaźników.
+</p>
+<p>
+    Wskaźnik jak sugeruje nazwa, wskazuje (a dokładnie wartość wskaźnika) na adres pamięci - 
+    dzięki temu możemy operować na innym obszarze pamięci nie mając do niego bezpośredniego dostępu. 
+    Bardzo często się przydaje gdy chcemy przekazać nie samą wartość do innej funkcji, 
+    a samo miejsce gdzie dane się znajdują (będzie to lepiej wyjaśnione w przykładach z funkcjami)
+</p>
+<p>
+    Warto też dodać, że z wskaźnikami należy się zachować <i>„na spokojnie”</i>, 
+    ponieważ jak dostaniemy zły adres, to możemy sobie uszkodzić program.
+</p>
+<p>
+    Wskaźnik jest też po prostu liczbą (bo adres jest liczbą), więc możemy modyfikować 
+    i dzięki temu się możemy dostać do innych komórek pamięci co jest pokazane w kolejnym przykładzie:
+</p>
+<div id='pointers'></div>
+<hr />
+<p>
+    w linijce 4 dodajemy do adresu <b>z</b> jeden, więc adres zmienił się na miejsce zmiennej <b>y</b>,
+    którą teraz możemy modyfikować! Jeżeli chcielibyśmy zmodyfikować komorkę do której nie mamy dostępu 
+    (jest np. dla innego programu) to jądro systemu zabije nasz program dla bezpieczeństwa systemu.
+</p>
+{% endblock %}
+{% block script %}
+<script>
+new Example(byId('pointers'), [
+    { action: 'set $x 11',           line: 'char x = 11;' },
+    { action: 'set $y 22',           line: 'char y = 22;' },
+    { action: 'set $z $x',           line: 'char* z = &x;' },
+    { action: 'add &$z 9',           line: '*z += 9;' },
+    { action: 'add $z 1',            line: 'z += 1;' },
+    { action: 'add &$z 8',           line: '*z += 8;' },
+], [ 
+    new StackComponent(),
+    new CodeComponent(),
+], {
+    stackLabels: {
+        x: 0x2000,
+        y: 0x2001,
+        z: { index: 0x2002, render: 'hex' },
+    }
+});
+</script>
+{% endblock %}

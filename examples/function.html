@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+{% set title = "Funkcje" %}
+{% block content %}
+<p>
+    Ok! jak już znamy wskaźniki, tablice oraz pętle, możemy przejść do funkcji.
+</p>
+<p>
+    Funkcja też jest… wskaźnikiem - dokładnie wskazuje adres do innego kawałku kodu.
+</p>
+<p>
+    Żeby wywołać funkcję i zwrócić wartość należy wykonać taki algorytm:
+    <ol>
+        <li>Dodaj N argumentów funkcji do stosu</li>
+        <li>Dodaj adres kolejnego rozkazu 
+            (robimy tylko po to, by po zakończeniu funkcji procesor wiedział gdzie ostatni raz skończyliśmy,
+            wyobraź sobie, że to jest taki <i>„checkpoint”</i>)</li>
+        <li>Zrób skok do miejsca kodu funkcji</li>
+        <li>Wykonaj kod funkcji</li>
+        <li>Zwróć wartość w specjalne miejsce 
+            (najczęściej to jest pierwszy rejestr procesora, u nas to jest zmienna <b>RET</b>)</li>
+        <li>Zwolnij stos (swoje zmienne + argumenty + adres gdzie ma wrócić)</li>
+        <li>Zrób skok to adresu który został wysłany na stos</li>
+    </ol>
+</p>
+<p>
+    Skomplikowane? przykład powinnien rozjaśnić:
+</p>
+<div id='function'></div>
+<hr />
+<p>
+    To samo możemy uzyskać przez podawanie wskaźnika, który zmodyfikuje zmienną z <b>main</b>, zamiast zwracać nową wartość. 
+</p>
+<div id='function-pointers'></div>
+<hr />
+<p>
+    No i na sam koniec, rekurencja przy pomocy fibonacciego. 
+    <a href="https://pl.wikipedia.org/wiki/Ciąg_Fibonacciego">Formuła.</a>
+</p>
+<p>
+    Nasz przykład obliczy 3 element ciągu fibonacciego i będzie to wyglądać tak:
+    <ol>
+        <li>F[3] = F[2] + F[1]</li>
+        <li>F[2] = F[1] + F[0]</li>
+        <li>F[0] = 0</li>
+        <li>F[1] = 1</li>
+        <li>F[2] = 0 + 1 = 1</li>
+        <li>F[3] = 1 + 1 = 2</li>
+    </ol>
+</p>
+<div id='fibonacci'></div>
+{% endblock %}
+{% block script %}
+<script>
+new Example(byId('function'), [
+    { action: 'set $SP 0x2000',               line: 'int main() {' },
+    { action: 'add $SP 3',                    line: '   int sum, a, b;' },
+    { action: 'set &$SP 33; set &$SP+1 $_STEP; add $SP 2; jmp 8',             
+                                              line: '   a = multBy2(33);' },
+    { action: 'set &$SP-2 &$RET; set &$SP 22; set &$SP+1 $_STEP; add $SP 2; jmp 8',             
+                                              line: '   b = multBy2(22);' },
+    { action: 'set &$SP-1 &$RET; set &$SP-3 ^&$SP-2; add &$SP-3 ^&$SP-1',  
+                                              line: '   sum = a + b;' },
+    { action: 'set $RET 0; sub $SP 1',        line: '   return 0;' },
+    { action: 'rjmp -1',                      line: '}' },
+    { action: 'nop',                          line: '' },
+    { action: 'nop',                          line: 'int multBy2(int x) {' },
+    { action: 'mul &$SP-2 2',                 line: '   x *= 2;' },
+    { action: 'set $RET ^&$SP-2; jmp ^&$SP-1; sub $SP 2',                   
+                                              line: '   return x;' },
+    { action: 'nop',                          line: '}' },
+], [ 
+    new StackComponent({ pointer: 'SP', size: 16 }),
+    new CodeComponent(),
+], {
+    stackSize: 0x2010,
+    stackLabels: {
+        SUM: 0x2000,
+        a: 0x2001,
+        b: 0x2002,
+        RET: { index: 0x200E, hideAddr: true },
+        SP:  { index: 0x200F, hideAddr: true, render: 'hex' },
+    }
+});
+
+new Example(byId('function-pointers'), [
+    { action: 'set $SP 0x2000',               line: 'int main() {' },
+    { action: 'add $SP 1',                    line: '   int sum;' },
+    { action: 'set &$SP 33; add $SP 1',        line: '   int a = 33;' },
+    { action: 'set &$SP 22; add $SP 1',        line: '   int b = 22;' },
+    { action: 'set &$SP &$SP-2; set &$SP+1 $_STEP; add $SP 2; jmp 10',
+                                              line: '   multBy2(&a);' },
+    { action: 'set &$SP &$SP-1; set &$SP+1 $_STEP; add $SP 2; jmp 10',
+                                              line: '   multBy2(&b);' },
+    { action: 'set &$SP-3 ^&$SP-2; add &$SP-3 ^&$SP-1',  
+                                              line: '   sum = a + b;' },
+    { action: 'set $RET 0; sub $SP 1',        line: '   return 0;' },
+    { action: 'rjmp -1',                      line: '}' },
+    { action: 'nop',                          line: '' },
+    { action: 'nop',                          line: 'void multBy2(int* x) {' },
+    { action: 'mul ^&$SP-2 2',                line: '   *x *= 2;' },
+    { action: 'jmp ^&$SP-1; sub $SP 2',       line: '}' },
+], [ 
+    new StackComponent({ pointer: 'SP', size: 16 }),
+    new CodeComponent(),
+], {
+    stackSize: 0x2010,
+    stackLabels: {
+        SUM: 0x2000,
+        a: 0x2001,
+        b: 0x2002,
+        RET: { index: 0x200E, hideAddr: true },
+        SP:  { index: 0x200F, hideAddr: true, render: 'hex' },
+    }
+});
+
+new Example(byId('fibonacci'), [
+    { action: 'set $SP 0x2000',               line: 'int main() {' },
+    { action: 'add $SP 1',                    line: '   int result;' },
+    { action: 'set &$SP 3; set &$SP+1 $_STEP; add $SP 2; jmp 6',             
+                                              line: '   result = fib(3);' },
+    { action: 'set &$SP-1 &$RET; set $RET 0; sub $SP 1',  
+                                              line: '   return 0;' },
+    { action: 'rjmp -1',                      line: '}' },
+    { action: 'nop',                          line: '' },
+    { action: 'nop',                          line: 'int fib(int x) {' },
+    { action: 'add $SP 2',                    line: '    int a, b;' },
+    { action: 'if= ^&$SP-4 0 ? +1 +2',        line: '    if (x == 0) {' },
+    { action: 'set $RET 0; jmp ^&$SP-3; sub $SP 4',                   
+                                              line: '        return 0;' },
+    { action: 'nop',                          line: '    }' },
+    { action: 'if= ^&$SP-4 1 ? +1 +2',        line: '    if (x == 1) {' },
+    { action: 'set $RET 1; jmp ^&$SP-3; sub $SP 4',                   
+                                              line: '        return 1;' },
+    { action: 'nop',                          line: '    }' },
+    { action: 'set &$SP ^&$SP-4; sub &$SP 1; set &$SP+1 $_STEP; add $SP 2; jmp 6',             
+                                              line: '    a = fib(x - 1);' },
+    { action: 'set &$SP-2 &$RET; set &$SP ^&$SP-4; sub &$SP 2; set &$SP+1 $_STEP; add $SP 2; jmp 6',             
+                                              line: '    b = fib(x - 2);' },
+    { action: 'set &$SP-1 &$RET; set $RET ^&$SP-1; add $RET ^&$SP-2; jmp ^&$SP-3; sub $SP 4',   
+                                              line: '    return a + b;' },
+    { action: 'nop',                          line: '}' },
+], [ 
+    new StackComponent({ pointer: 'SP', size: 16 }),
+    new CodeComponent({ start: 0, size: 6 }),
+    new CodeComponent({ start: 6, size: 12 }),
+], {
+    stackSize: 0x2010,
+    stackLabels: {
+        result: 0x2000,
+        RET: { index: 0x200E, hideAddr: true },
+        SP:  { index: 0x200F, hideAddr: true, render: 'hex' },
+    }
+});
+</script>
+{% endblock %}
