@@ -1,3 +1,6 @@
+static/script.js
+node_modules
+
 build
 venv
 *.swp
