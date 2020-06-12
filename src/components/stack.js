@@ -6,6 +6,7 @@ import { makeEl } from "@/make-el";
 export default class StackComponent extends BaseComponent {
 
     constructor(options) {
+        super();
         this.element = makeEl('div', 'mem');
         options = options || {};
         var start = options.start !== undefined ? options.start : 0x2000;
@@ -21,7 +22,7 @@ export default class StackComponent extends BaseComponent {
 
     _makeIndexToLabel(stackLabels) {
         let indexToLabel = {};
-        Object.entries(stackLabels).forEach(({ key, val }) => {
+        Object.entries(stackLabels).forEach(([key, val]) => {
             if (typeof val === 'number') {
                 indexToLabel[val] = { key: key };
                 return;
@@ -79,7 +80,7 @@ export default class StackComponent extends BaseComponent {
         if (!label) {
             return -1;
         }
-        const pointer = machine.options.stackLabels[label];
+        let pointer = machine.options.stackLabels[label];
         if (typeof pointer !== 'number') {
             pointer = pointer.index;
         }

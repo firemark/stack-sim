@@ -13,40 +13,44 @@ export default class Parser {
     parse(action) {
         const rawArgs = action.trim().split(/ +/);
         const actionName = rawArgs[0].toLowerCase();
-        const args = parseArgs(rawArgs);
+        const args = this.parseArgs(rawArgs);
         return [actionName, args];
     }
 
     parseArgs(rawArgs) {
-        return rawArgs.splice(1).map(arg => {
-            this.rules.reduce(this.parseArgsReduce, arg)
-        });
+        return rawArgs.splice(1).map(arg =>
+            this.rules.reduce(
+                this.parseArgsReduce.bind(this),
+                arg,
+            )
+        );
     }
 
     parseArgsReduce(arg, { rule, cb }) {
+        const example = this.example;
         const _this = this;
 
         function innerCb() {
-            let ruleArgs = [this.example];
-            for(let i = 1; i < arguments.lenght; i++) {
+            let ruleArgs = [example];
+            for(let i = 1; i < arguments.length - 2; i++) {
                 ruleArgs.push(arguments[i]);
             }
-            cb.bind(_this).call(ruleArgs);
+            return cb.apply(_this, ruleArgs);
         }
 
         return arg.replace(rule, innerCb);
     }
 
     BOOM(msg) {
-        this.example.boom(msg);
+        this.example.throwBoom(msg);
     }
 
-    pointerFromStack(val) {
-        var deep = val.match(/&/g).length;
-        val = val.substr(deep);
-        for(var i=0; i < deep; i++) {
-            var index = parseInt(val);
-            if (isNaN(index)) boom("wrong value in pointer:" + index);
+    pointerFromStack(stack, valRaw) {
+        const deep = valRaw.match(/&/g).length;
+        let val = valRaw.substr(deep);
+        for(let i=0; i < deep; i++) {
+            const index = parseInt(val);
+            if (isNaN(index)) this.BOOM("wrong value in pointer:" + index);
             val = stack[index];
             if (val === undefined) this.BOOM("segmentation fault");
         }
@@ -63,12 +67,12 @@ export default class Parser {
         return index.toString();
     }
 
-    parsePointer(_, val) {
-        return this.pointerFromStack(val).toString();
+    parsePointer({ stack }, val) {
+        return this.pointerFromStack(stack, val).toString();
     }
 
-    parseNestedPointer(_, val) {
-        return this.pointerFromStack(val.replace(/\^/g, '&')).toString();
+    parseNestedPointer({ stack }, val) {
+        return this.pointerFromStack(stack, val.replace(/\^/g, '&')).toString();
     }
 
     parseOffset({ boom }, indexRaw, sign, offsetRaw) {

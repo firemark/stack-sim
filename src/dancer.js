@@ -3,7 +3,7 @@ import actions from "@/actions";
 
 export default class Dancer {
 
-    contructor(example) {
+    constructor(example) {
         this.example = example;
         this.parser = new Parser(example);
         this.actionClasses = actions;
@@ -23,8 +23,8 @@ export default class Dancer {
                 return;
             }
 
-            const action = new actionCls(this.example);
-            action.execute.call(action, rawArgs);
+            const action = actionCls.create(this.example);
+            action.execute.apply(action, rawArgs);
         });
     }
 

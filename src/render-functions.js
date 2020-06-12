@@ -28,7 +28,7 @@ export default {
             return escapeVal(val);
         }
         const chr = String.fromCharCode(val);
-        return chr + '<small>(' + escapeVal(val) + ')</small>';
+        return chr + `<small>(${escapeVal(val)})</small>`;
     },
 
 };

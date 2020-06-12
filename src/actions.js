@@ -3,13 +3,17 @@ class BaseAction {
         this.example = example;
     }
 
+    static create(example) {
+        return new this(example);
+    }
+
     BOOM(msg) {
-        this.example.boom(msg);
+        this.example.throwBoom(msg);
     }
 
     BOOMSegmentation(val) {
         if (val === undefined) {
-            this.boom("segmentation fault");
+            this.BOOM("segmentation fault");
         }
     }
 
@@ -34,16 +38,24 @@ class SetAction extends BaseAction {
 }
 
 
-class BinOpAction extends BaseAction {
+class OpAction extends BaseAction {
 
     constructor(op, example) {
-        super.constructor(example);
+        super(example);
         this.op = op;
     }
 
     static mixin(op) {
-        return example => BinOpAction(op, example);
+        const cls = this;
+        return {
+            create(example) { return new cls(op, example); }
+        };
     }
+
+}
+
+
+class BinOpAction extends OpAction {
 
     execute(toIndex, val) {
         const stack = this.example.stack;
@@ -60,19 +72,10 @@ class BinOpAction extends BaseAction {
 }
 
 
-class IfAction extends BaseAction {
-
-    constructor(op, example) {
-        super.constructor(example);
-        this.op = op;
-    }
-
-    static mixin(op) {
-        return example => IfAction(op, example);
-    }
+class IfAction extends OpAction {
 
     execute(aRaw, bRaw, questionMark, trueIndex, falseIndex) {
-        if (!questionMark !== '?') {
+        if (questionMark !== '?') {
             console.warn('"if" doesn\'t have a question mark!');
             return;
         }
@@ -93,7 +96,7 @@ class IfAction extends BaseAction {
 
 class JmpAction extends BaseAction {
     execute(stepRaw) {
-        const step = parseVal(stepRaw);
+        const step = this.parseVal(stepRaw);
         if (!isNaN(step)) {
             this.example.nextStep = step;
         }
@@ -103,7 +106,7 @@ class JmpAction extends BaseAction {
 
 class RelJmpAction extends BaseAction {
     execute(stepRaw) {
-        const step = parseVal(stepRaw);
+        const step = this.parseVal(stepRaw);
         if (!isNaN(step)) {
             this.example.nextStep += step;
         }

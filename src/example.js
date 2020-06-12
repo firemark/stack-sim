@@ -9,6 +9,7 @@ export default class Example {
             stackSize: options.stackSize || 0x200A,
             stackLabels: options.stackLabels || {},
             parseVal: options.parseVal || this.defaultParseVal,
+            availableFlags: options.availableFlags || [],
         }
         this.code = code;
         this.container = container;
@@ -68,9 +69,18 @@ export default class Example {
     reset() {
         this.clearStack();
         this.clearCode();
+        this.flags = this.setupFlags();
         this.step = -1;
         this.nextStep = 0;
         this.boom = false;
+    }
+
+    setupFlags() {
+        const flags = {};
+        this.options.availableFlags.forEach((flag) => {
+            flags[flag] = false;
+        });
+        return flags;
     }
 
     clearStack() {
@@ -93,11 +103,11 @@ export default class Example {
         this.oldStack = this.stack.slice();
     }
 
-    boom(msg) {
+    throwBoom(msg) {
         const line = this.code[this.step];
         line.boom = true;
         line.errorMsg = msg;
-        this.example.machine.boom = true;
+        this.boom = true;
         throw msg;
     }
 

@@ -5,6 +5,7 @@ import { makeEl } from "@/make-el";
 export default class CodeComponent extends BaseComponent {
 
     constructor(options) {
+        super();
         this.element = makeEl('ol', 'code');
         options = options || {};
         this.options = {
