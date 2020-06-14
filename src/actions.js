@@ -1,10 +1,10 @@
 class BaseAction {
-    constructor(example) {
+    constructor(example, options) {
         this.example = example;
     }
 
-    static create(example) {
-        return new this(example);
+    static create(example, options={}) {
+        return new this(example, options);
     }
 
     BOOM(msg) {
@@ -40,18 +40,25 @@ class SetAction extends BaseAction {
 
 class OpAction extends BaseAction {
 
-    constructor(op, example) {
+    constructor(example, options) {
         super(example);
-        this.op = op;
+        this.op = options.op;
     }
 
     static mixin(op) {
-        const cls = this;
         return {
-            create(example) { return new cls(op, example); }
+            create: (example, options) => new this(example, { op, ...options }),
         };
     }
 
+    parseTwoVals(toIndex, val) {
+        const stack = this.example.stack;
+        const valueInStack = stack[toIndex];
+        this.BOOMSegmentation(valueInStack);
+        const a = this.parseVal(valueInStack);
+        const b = this.parseVal(val);
+        return [a, b];
+    }
 }
 
 
@@ -59,16 +66,14 @@ class BinOpAction extends OpAction {
 
     execute(toIndex, val) {
         const stack = this.example.stack;
-        const valueInStack = stack[toIndex];
-        this.BOOMSegmentation(valueInStack);
-        const a = this.parseVal(valueInStack);
-        const b = this.parseVal(val);
+        const [a, b] = this.parseTwoVals(toIndex, val);
         if (isNaN(a) || isNaN(b)) {
             stack[toIndex] = '???';
         } else {
             stack[toIndex] = eval(`a ${this.op} b`);
         }
     }
+
 }
 
 
@@ -114,7 +119,115 @@ class RelJmpAction extends BaseAction {
 }
 
 
-export default {
+class BitAction extends OpAction {
+
+    constructor(example, options) {
+        super(example, options);
+        this.bits = options.bits || 8;
+    }
+
+    toBits(val) {
+        const max = 1 << this.bits;
+        const carry = Boolean(val & max);
+        const newVal = val & (max - 1);
+        return [carry, newVal];
+    }
+
+    execute(toIndex, val) {
+        const stack = this.example.stack;
+        const [a, b] = this.parseTwoVals(toIndex, val);
+        if (isNaN(a) || isNaN(b)) {
+            stack[toIndex] = '???';
+            return;
+        }
+
+        const preVal = eval(`a${this.op}b`);
+        const [newCarry, newVal] = this.toBits(preVal);
+        const flags = this.example.flags;
+        flags.carry = newCarry;
+        flags.sign = Boolean(newVal >> (this.bits - 1));
+        flags.zero = newVal == 0;
+        stack[toIndex] = newVal;
+    }
+}
+
+
+class SetBitAction extends BitAction {
+
+    constructor(example, options) {
+        super(example, options);
+        this.bits = options.bits || 8;
+    }
+
+    execute(toIndex, val) {
+        const preVal = this.parseVal(val);
+        const [newCarry, newVal] = this.toBits(preVal);
+        const flags = this.example.flags;
+        flags.carry = newCarry;
+        flags.sign = Boolean(newVal >> (this.bits - 1));
+        flags.zero = newVal == 0;
+        this.example.stack[toIndex] = newVal;
+    }
+
+}
+
+class NegBitAction extends BaseAction {
+
+    constructor(example, options) {
+        super(example, options);
+        this.bits = options.bits || 8;
+    }
+
+    execute(toIndex) {
+        const stack = this.example.stack;
+        const valueInStack = stack[toIndex];
+        this.BOOMSegmentation(valueInStack);
+        const val = this.parseVal(valueInStack);
+        if (isNaN(val)) {
+            stack[toIndex] = '???';
+            return;
+        }
+        const max = (1 << this.bits) - 1;
+        flags.sign = Boolean(newVal >> (this.bits - 1));
+        flags.zero = newVal == 0;
+        stack[toIndex] = (val & max) ^ max;
+    }
+
+}
+
+class AddBitAction extends BitAction {
+
+    constructor(example, options) {
+        super(example, options);
+        this.op = '+';
+    }
+
+}
+
+class AdcBitAction extends AddBitAction {
+
+    toBits(val) {
+        const max = 1 << this.bits;
+        val += this.example.flags.carry ? 1 : 0;
+        const carry = Boolean(val & max);
+        const newVal = val & (max - 1);
+        return [carry, newVal];
+    }
+
+}
+
+
+class SubBitAction extends AddBitAction {
+
+    parseTwoVals(toIndex, val) {
+        const max = (1 << this.bits) - 1;
+        const [a, b] = super.parseTwoVals(toIndex, val);
+        return [a, (b ^ max) + 1];
+    }
+
+}
+
+const SIMPLE_ACTIONS = {
     set: SetAction,
     add: BinOpAction.mixin('+'),
     sub: BinOpAction.mixin('-'),
@@ -130,3 +243,30 @@ export default {
     rjmp: RelJmpAction,
     nop: NopAction,
 };
+
+const BIT_ACTIONS = {
+    set: SetBitAction,
+    add: AddBitAction,
+    adc: AdcBitAction,
+    sub: SubBitAction,
+    or: BitAction.mixin('|'),
+    and: BitAction.mixin('&'),
+    xor: BitAction.mixin('^'),
+    neg: NegBitAction,
+};
+
+export default function getAction(actionName, example) {
+    const bitActionMatch = actionName.match(/^(\w+)(\d+)$/);
+    if (bitActionMatch) {
+        const [,bitActionName, bits] = bitActionMatch;
+        const bitCls = BIT_ACTIONS[bitActionName];
+        if (!bitCls) return null;
+        return bitCls.create(example, { bits });
+    }
+
+    const cls = SIMPLE_ACTIONS[actionName];
+    if (!cls) return null;
+    return cls.create(example);
+}
+
+

@@ -19,6 +19,20 @@ export default {
         return '0x' + val.toString(16);
     },
 
+    bit8(val) {
+        if (typeof val !== 'number') {
+            return escapeVal(val);
+        }
+        return '0b' + val.toString(2).padStart(8, '0');
+    },
+
+    bit4(val) {
+        if (typeof val !== 'number') {
+            return escapeVal(val);
+        }
+        return '0b' + val.toString(2).padStart(4, '0');
+    },
+
     chr(val) {
         if (typeof val !== 'number') {
             return escapeVal(val);

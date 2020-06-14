@@ -12,4 +12,4 @@ window.byId = byId;
 window.CodeComponent = CodeComponent;
 window.StackComponent = StackComponent;
 window.FlagsComponent = FlagsComponent;
-
+window.CpuFlags = ['carry', 'sign', 'zero'];

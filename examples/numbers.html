@@ -1,0 +1,200 @@
+{% extends "base.html" %}
+{% set title = "Liczby" %}
+{% block content %}
+
+<p>
+    Tutaj będzie wyjaśnione trochę o sytemach liczbowych oraz sporo o tym jak liczby się zapisywane i używane w procesorach.
+</p>
+
+<p>
+    Najpierw nalezy wyjasnić, że zależnie od systemu, liczbę można zapisać na wiele sposobów.
+    Jest ich sporo, weźmy sobie liczbę <strong>65</strong> możemy przedstawić jako:
+    <table style="{margin: auto;}">
+        <tr>
+            <td>65</td>
+            <td>LXV</td>
+            <td>٦٥</td>
+        </tr>
+        <tr>
+            <td><img src="static/babilon.png" /></td>
+            <td>🍎</td>
+            <td>A</td>
+        </tr>
+        <tr>
+            <td>0b1000001</td>
+            <td>0x41</td>
+            <td>0o101</td>
+        </tr>
+    </table>
+</p>
+
+<p>
+    Mamy dwa główne systemy zapisów liczb:
+    <ul>
+        <li>Addytywny - dodajemy elementy do siebie (system jedynkowy, rzymski)</li>
+        <li>Pozycyjny - pozycja cyfry w zapisie jest wieloktronością danej potęgi (binarny, arabski, trójkowy zrównoważony)</li>
+    </ul>
+
+    Zajmiemy się głównie systemem pozycyjnym.
+</p>
+
+<p>
+    Ok, dobra, ale jak działają liczby w komputerze?
+    Zacznijmy od tego, że mamy generalnie dwa typy liczb w procesorach: zmiennoprzecinkowe (float) oraz całkowite (integer).
+</p>
+
+<p>
+    Zacznijmy najpierw od dodatnich całkowitych, a tak naprawdę od jednego oraz dwóch bitów by zrozumieć jak działa zapisywanie oraz dodawanie.
+    Bit ma dwie wartości:
+    <ul>
+        <li>wysoki (<b>H</b> lub <b>1</b> </li>
+        <li>oraz niski (<b>L</b> lub <b>0</b>) </li>
+        <li>stosowany w elektronice - wysokiej impedancji - używa się go gdy wejście nie jest do niczego podłączone </li>
+    </ul>
+</p>
+
+<p>
+    W praktyce mamy 4 "podstawowe" operacje na bitach:
+    <ul>
+        <li><b>OR</b>  (lub) - jak któryś bit jest <b>1</b> to wynik wynosi <b>1</b>, w przeciwnym przypadku <b>0</b></li>
+        <li><b>NOT</b> (negacja, inwersja) - odwraca bit</li>
+        <li><b>AND</b> (i) - jak któryś bit jest <b>0</b> to wynik wynosi <b>0</b>, w przeciwnym przypadku <b>1</b></li>
+        <li><b>XOR</b> (alternatywa) - jeżeli dwa bity się różnią, to wynik wynosi <b>1</b>, w przeciwnym przypadku <b>0</b></li>
+    </ul>
+
+</p>
+
+<p>
+    Sam procesor robi już operacje na rejestrach - czyli liście bitów. To jest ważne, by nie patrzeć na rejestr jako liczbę a raczej jako "stan". Taki sam stan bitów może oznaczać calkowicie inną wartość - wszystko zależy jak ją zinterpretujemy.
+</p>
+
+<div id="logic-operators"></div>
+
+<p>
+    Ok, jak już rozumiemy podstawowe operacje, to czas przejść jak działa dodawanie. Najpierw trochę matematyki w systemie binarnym:
+
+    <ul>
+        <li>x + y = cs</li>
+        <li>0 + 0 = 00</li>
+        <li>1 + 0 = 01</li>
+        <li>0 + 1 = 01</li>
+        <li>1 + 1 = 10</li>
+    </ul>
+
+    Jeżeli to rozbijemy na dwa osobne bity:
+
+    <ul>
+        <li>x + y = s</li>
+        <li>0 + 0 = 0</li>
+        <li>1 + 0 = 1</li>
+        <li>0 + 1 = 1</li>
+        <li>1 + 1 = 0</li>
+    </ul>
+    <ul>
+        <li>x + y = c</li>
+        <li>0 + 0 = 0</li>
+        <li>1 + 0 = 0</li>
+        <li>0 + 1 = 0</li>
+        <li>1 + 1 = 1</li>
+    </ul>
+
+    To wychodzą nam dwie funkcje:
+    <ul>
+        <li>s = XOR(x, y)</li>
+        <li>c = AND(x, y)</li>
+    </ul>
+
+    Gratulacje - zrobiliśmy układ zwany <i>pół sumatorem (half-adder)</i>,
+    który ma dwa bity wyjścia - wynik dodawania (s, od <i>sum</i>) oraz bit przenośny (c, od <i>carry</i>).
+    metoda przypomina bardzo dodawanie w słupku (mieliśmy takie coś w szkole podstawowej, tak napewno było, a później odkryliśmy kalkulatory)
+</p>
+
+<p> Czas na pełny sumator: </p>
+
+<img src="static/adder.png" />
+
+<p>
+    Różnica między pół a pełnym sumatorem jest taka, że doszedł trzeci argument - carry z poprzedniego bitu (wciąż nas prześladuje dodawanie w słupku).
+    Przy pomocy N sumatorów możemy dodawać liczby N bitowe. czyli do typu <b>int</b>, który ma 32 bity, potrzebujemy w procesorze 32 sumatory.
+</p>
+
+<p>
+    Ok, jak już ogarniamy sumatory i bit przenośny (carry), to możemy dodawać liczby:
+</p>
+
+<div id="add-1"></div>
+
+<p>
+    Co się stało w linijce 3? wystapiło przepełnienie rejestru - w tej linijce zrobiliśmy operację 12 + 4 = 16, do którego potrzebujemy 5 bitów, a nasz procesorek ma tylko 4 bity. Ale nie jest źle - bo ustawiła się flaga CARRY w procesorze która informuje, że przy dodawaniu ostatni bit miał przeniesienie.
+</p>
+
+<p> Możemy to wykorzystać, jezeli chcemy w naszym 4bitowym procesorku zrobić operacji 8 bitowe. W poniższym przykładzie zrobimy w pseudo-ASM sumę 0x8 + 0x88 (8 bitowej). Użyjemy tutaj rozkazu ADD oraz ADC (Add with Carry) </p>
+
+<div id="add-2"></div>
+
+<p>
+    Jak dotrwaliście do końca - to pewnie zauważyliście, że dodatkowy bit z 1 linijki, przeniósł się do operacji z 2 linijki.
+</p>
+
+{% endblock %}
+{% block script %}
+<script>
+    new Example(byId('logic-operators'), [
+        { action: 'set $X 5; set $Y 3',          line: 'uint4 x = 0x5, y = 0x3;' },
+        { action: 'set $NEG &$X; neg4 $NEG',     line: 'uint4 neg = ~x;' },
+        { action: 'set $OR &$X;  or4 $OR &$Y',   line: 'uint4 or = x | y;' },
+        { action: 'set $AND &$X; and4 $AND &$Y', line: 'uint4 and = x & y;' },
+        { action: 'set $XOR &$X; xor4 $XOR &$Y', line: 'uint4 xor = x ^ y;' },
+        { action: 'nop', line: ''},
+    ], [
+        new StackComponent({ start: 0, size: 8 }),
+        //new FlagsComponent(),
+        new CodeComponent(),
+    ], {
+        availableFlags: CpuFlags,
+        stackSize: 8,
+        stackLabels: {
+            X:   { index: 0, render: ['bit4', 'hex'] },
+            Y:   { index: 1, render: ['bit4', 'hex'] },
+            NEG: { index: 2, render: ['bit4', 'hex'] },
+            OR:  { index: 3, render: ['bit4', 'hex'] },
+            AND: { index: 4, render: ['bit4', 'hex'] },
+            XOR: { index: 5, render: ['bit4', 'hex'] },
+        }
+    });
+    new Example(byId('add-1'), [
+        { action: 'set4 $A 0',          line: 'uint4 a = 0x0;' },
+        { action: 'add4 $A 10',         line: 'a += 0xA;' },
+        { action: 'add4 $A 2',          line: 'a += 0x2;' },
+        { action: 'add4 $A 4',          line: 'a += 0x4;' },
+        { action: 'nop', line: ''},
+    ], [
+        new StackComponent({ start: 0, size: 8 }),
+        new FlagsComponent(),
+        new CodeComponent(),
+    ], {
+        availableFlags: CpuFlags,
+        stackSize: 8,
+        stackLabels: {
+            A:   { index: 0, render: ['bit4', 'hex'] },
+        }
+    });
+    new Example(byId('add-2'), [
+        { action: 'set4 $A 8; set4 $B 0', line: 'SET A 0x8; SET B 0x0' },
+        { action: 'add4 $A 8',            line: 'ADD A 0x8;' },
+        { action: 'adc4 $B 8',            line: 'ADC B 0x8;' },
+        { action: 'nop', line: ''},
+    ], [
+        new StackComponent({ start: 0, size: 8 }),
+        new FlagsComponent(),
+        new CodeComponent(),
+    ], {
+        availableFlags: CpuFlags,
+        stackSize: 8,
+        stackLabels: {
+            A:   { index: 0, render: ['bit4', 'hex'] },
+            B:   { index: 1, render: ['bit4', 'hex'] },
+        }
+    });
+</script>
+{% endblock %}

@@ -1,12 +1,11 @@
 import Parser from "@/parser";
-import actions from "@/actions";
+import getAction from "@/actions";
 
 export default class Dancer {
 
     constructor(example) {
         this.example = example;
         this.parser = new Parser(example);
-        this.actionClasses = actions;
     }
 
     dance() {
@@ -16,14 +15,13 @@ export default class Dancer {
         this.example.nextStep = this.example.step + 1;
         actions.forEach(rawAction => {
             const [actionName, rawArgs] = this.parser.parse(rawAction);
-            const actionCls = this.actionClasses[actionName];
+            const action = getAction(actionName, this.example);
 
-            if (!actionCls) {
+            if (!action) {
                 console.warn('undefined action:', actionName);
                 return;
             }
 
-            const action = actionCls.create(this.example);
             action.execute.apply(action, rawArgs);
         });
     }

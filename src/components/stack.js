@@ -62,7 +62,9 @@ export default class StackComponent extends BaseComponent {
             const label = indexToLabel[index];
             const cell = makeEl('div', 'cell-val', stackVal);
             cell.dataset.index = index;
-            cell.dataset.render = label && label.render ? label.render : 'int'
+            const [render, renderAlt] = this.getRenderFromLabel(label);
+            cell.dataset.render = render;
+            cell.dataset.renderAlt = renderAlt;
 
             const labelName = getLabelName(label, index);
             const cellName = makeEl('div', 'cell-name', labelName);
@@ -73,6 +75,19 @@ export default class StackComponent extends BaseComponent {
 
             element.appendChild(item);
         }
+    }
+
+    getRenderFromLabel(label) {
+        if (!label || !label.render) {
+            return ['int', '-'];
+        }
+
+        const render = label.render;
+        if (typeof render === 'string') {
+            return [render, '-'];
+        }
+
+        return render;
     }
 
     getStackPointer(machine) {
@@ -94,29 +109,29 @@ export default class StackComponent extends BaseComponent {
     }
 
     draw(machine) {
-        var items = this.element.querySelectorAll('.cell-val');
-        var stack = machine.stack;
-        var oldStack = machine.oldStack;
-        var stackPointer = this.getStackPointer(machine);
+        const items = this.element.querySelectorAll('.cell-val');
+        const stack = machine.stack;
+        const oldStack = machine.oldStack;
+        const stackPointer = this.getStackPointer(machine);
 
-        items.forEach(function (item) {
-            var index = item.dataset.index;
-            var newValue = stack[index];
-            var oldValue = oldStack[index];
-            var render = RENDER_FUNCTIONS[item.dataset.render];
+        items.forEach((item) => {
+            const index = item.dataset.index;
+            const newValue = stack[index];
+            const oldValue = oldStack[index];
+            const render = RENDER_FUNCTIONS[item.dataset.render];
+            const renderAlt = item.dataset.renderAlt !== '-' ? RENDER_FUNCTIONS[item.dataset.renderAlt] : null;
 
-            item.dataset.currentInStack = index == stackPointer ? 'yes' : 'no';
             item.innerHTML = ''; // reset node
             if (newValue == oldValue) {
                 item.innerHTML = render(newValue);
             } else {
-                var oldEl = makeEl('span', 'old');
+                const oldEl = makeEl('span', 'old');
                 oldEl.innerHTML = render(oldValue);
 
-                var newEl = makeEl('span', 'new');
+                const newEl = makeEl('span', 'new');
                 newEl.innerHTML = render(newValue);
 
-                var arrowEl = makeEl('span', 'arrow', '→');
+                const arrowEl = makeEl('span', 'arrow', '→');
 
                 item.appendChild(oldEl);
                 item.appendChild(arrowEl);
@@ -124,6 +139,7 @@ export default class StackComponent extends BaseComponent {
             }
         })
     }
+
 
 }
 
