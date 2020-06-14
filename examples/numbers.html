@@ -68,6 +68,10 @@
     Sam procesor robi już operacje na rejestrach - czyli liście bitów. To jest ważne, by nie patrzeć na rejestr jako liczbę a raczej jako "stan". Taki sam stan bitów może oznaczać calkowicie inną wartość - wszystko zależy jak ją zinterpretujemy.
 </p>
 
+<p>
+    Załóżmy, że mamy procesor który operuje na 4bitowych słowach - takowe nie istnieją, ale pomogą zrozumieć działanie.
+</p>
+
 <div id="logic-operators"></div>
 
 <p>
@@ -128,13 +132,31 @@
     Co się stało w linijce 3? wystapiło przepełnienie rejestru - w tej linijce zrobiliśmy operację 12 + 4 = 16, do którego potrzebujemy 5 bitów, a nasz procesorek ma tylko 4 bity. Ale nie jest źle - bo ustawiła się flaga CARRY w procesorze która informuje, że przy dodawaniu ostatni bit miał przeniesienie.
 </p>
 
-<p> Możemy to wykorzystać, jezeli chcemy w naszym 4bitowym procesorku zrobić operacji 8 bitowe. W poniższym przykładzie zrobimy w pseudo-ASM sumę 0x8 + 0x88 (8 bitowej). Użyjemy tutaj rozkazu ADD oraz ADC (Add with Carry) </p>
+<p>
+Niestety ze wględu, że liczby całkowite są w stanie się przekręcić jak licznik w samochodzie, może doprowadzić do niefajnych błędów jak np. w grze Civilization1 - poziom agresji był zapisywany w 1 bajcie (8bitów). Gandhi jako władca dawał 1 poziom agresji. Jezeli wybrało sie ustrój demokracja która obniżała poziom agresji to poziom się przekręcał z 1 - 2 = 255 (przekręcilśmy w drugą stronę, 255 to największa 8bitowa wartość) co doprowadzało automatycznie do wojny atomowej (sic!) - więcej <a href="https://civilization.fandom.com/wiki/Mohandas_Gandhi_(Civ1)">Tutaj</a>
+</p>
+
+<p> tak samo działo się w grze pacman - gdy przeszło się poziom 255 miał nastąpić poziom 256, ale ze względu na 8 bitów przesunął sie na poziom 0. I ze względu na warunek <strong>for(i=1; i != LEVEL; i++)</strong> doprowadzało do zgliczowania <a href="https://pacman.fandom.com/wiki/Map_256_Glitch">mapy</a> </p>
+
+<p> Możemy wykorzystać flagę CARRY, jezeli chcemy w naszym 4bitowym procesorku zrobić operacji 8 bitowe. W poniższym przykładzie zrobimy w pseudo-ASM sumę 0x8 + 0x88 (8 bitowej). Użyjemy tutaj rozkazu ADD oraz ADC (Add with Carry) </p>
 
 <div id="add-2"></div>
 
 <p>
-    Jak dotrwaliście do końca - to pewnie zauważyliście, że dodatkowy bit z 1 linijki, przeniósł się do operacji z 2 linijki.
+    Jak dotrwaliście do końca - to pewnie zauważyliście, że dodatkowy bit z operacji z 1 linijki, przeniósł się do operacji z 2 linijki.
 </p>
+
+<p>
+    Pojawił się też problem - teraźniejsze procesory potrafią operować na rejestrach 8bitowych, 16bitowych, 32 oraz 64 (oraz większe ale to już inny temat). I teraz - w jakiej kolejności zapisywać kolejne komórki pamięci? Od najwyższego bajtu czy od najniższego?
+</p>
+
+<p>
+    Odpowiedź to <b>zależy</b>. Mamy dwa kolejności - Big Endian (pierwszy jest zapisywany najwyższy bajt) oraz Little Endian (zapisywany najniższy bajt jako pierwszy). Są różne formaty plików oraz różne procesory które obsługują taki zapis lub taki zapis. My jednak przyjmiemy zapis Little Endian bo tak w tej chwili działają najpopularniejsze procesory (czyli x86, AVR czy ARM)
+</p>
+
+<img src="static/endian.png" />
+
+<p> Ok, a co z liczbami ujemnymi? </p>
 
 {% endblock %}
 {% block script %}
@@ -148,7 +170,6 @@
         { action: 'nop', line: ''},
     ], [
         new StackComponent({ start: 0, size: 8 }),
-        //new FlagsComponent(),
         new CodeComponent(),
     ], {
         availableFlags: CpuFlags,
