@@ -121,15 +121,24 @@ export default class StackComponent extends BaseComponent {
             const render = RENDER_FUNCTIONS[item.dataset.render];
             const renderAlt = item.dataset.renderAlt !== '-' ? RENDER_FUNCTIONS[item.dataset.renderAlt] : null;
 
+            function renderFull(val) {
+                let r = render(val);
+                if (renderAlt) {
+                    const rAlt = renderAlt(val);
+                    r += `<small>(${rAlt})</small>`;
+                }
+                return r;
+            }
+
             item.innerHTML = ''; // reset node
             if (newValue == oldValue) {
-                item.innerHTML = render(newValue);
+                item.innerHTML = renderFull(newValue);
             } else {
                 const oldEl = makeEl('span', 'old');
-                oldEl.innerHTML = render(oldValue);
+                oldEl.innerHTML = renderFull(oldValue);
 
                 const newEl = makeEl('span', 'new');
-                newEl.innerHTML = render(newValue);
+                newEl.innerHTML = renderFull(newValue);
 
                 const arrowEl = makeEl('span', 'arrow', '→');
 

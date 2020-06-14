@@ -75,7 +75,7 @@
 <div id="logic-operators"></div>
 
 <p>
-    Ok, jak już rozumiemy podstawowe operacje, to czas przejść jak działa dodawanie. Najpierw trochę matematyki w systemie binarnym:
+Ok, jak już rozumiemy podstawowe operacje, to czas przejść jak działa dodawanie. Najpierw trochę matematyki w systemie binarnym <a href="https://eduinf.waw.pl/inf/alg/006_bin/0010.php">(więcej tutaj o liczbach)</a>:
 
     <ul>
         <li>x + y = cs</li>
@@ -158,6 +158,23 @@ Niestety ze wględu, że liczby całkowite są w stanie się przekręcić jak li
 
 <p> Ok, a co z liczbami ujemnymi? </p>
 
+<p>
+    Sposobów są kilka, najpopularniejszy dla liczb całkowitych jest zapis 2C:
+    <ol>
+        <li>Najstarszy bit jest bitem znaku (<b>0</b> to dodatnia, <b>1</b> to ujemna)</li>
+        <li>Najstarszy bit ma wagę -2ⁿ⁻¹</li>
+        <li>Pozostałe bity są liczone jak w poprzednim systemie</li>
+        <li>Dodawanie oraz odejmowanie liczy się tak samo jak w systemie nieznakowym</li>
+        <li><a href="https://eduinf.waw.pl/inf/alg/006_bin/0018.php">Więcej tutaj</a>
+    </ol>
+</p>
+
+<div id="add-3"></div>
+
+<p>
+    Podobnie jak w systemie bezznakowym przekręcenie licznika jest kosztowne - w grze Transport Tycoon (dziadek OpenTTD) była możliwość stworzenia tak długiego mostu, że koszt był tak duży (16bitowy znakowy), że zmieniał się znak i cena budowy była ujemna :-).
+</p>
+
 {% endblock %}
 {% block script %}
 <script>
@@ -175,12 +192,12 @@ Niestety ze wględu, że liczby całkowite są w stanie się przekręcić jak li
         availableFlags: CpuFlags,
         stackSize: 8,
         stackLabels: {
-            X:   { index: 0, render: ['bit4', 'hex'] },
-            Y:   { index: 1, render: ['bit4', 'hex'] },
-            NEG: { index: 2, render: ['bit4', 'hex'] },
-            OR:  { index: 3, render: ['bit4', 'hex'] },
-            AND: { index: 4, render: ['bit4', 'hex'] },
-            XOR: { index: 5, render: ['bit4', 'hex'] },
+            X:   { index: 0, render: ['bit4', 'dec_u8'] },
+            Y:   { index: 1, render: ['bit4', 'dec_u8'] },
+            NEG: { index: 2, render: ['bit4', 'dec_u8'] },
+            OR:  { index: 3, render: ['bit4', 'dec_u8'] },
+            AND: { index: 4, render: ['bit4', 'dec_u8'] },
+            XOR: { index: 5, render: ['bit4', 'dec_u8'] },
         }
     });
     new Example(byId('add-1'), [
@@ -197,7 +214,7 @@ Niestety ze wględu, że liczby całkowite są w stanie się przekręcić jak li
         availableFlags: CpuFlags,
         stackSize: 8,
         stackLabels: {
-            A:   { index: 0, render: ['bit4', 'hex'] },
+            A:   { index: 0, render: ['bit4', 'dec_u8'] },
         }
     });
     new Example(byId('add-2'), [
@@ -213,8 +230,24 @@ Niestety ze wględu, że liczby całkowite są w stanie się przekręcić jak li
         availableFlags: CpuFlags,
         stackSize: 8,
         stackLabels: {
-            A:   { index: 0, render: ['bit4', 'hex'] },
-            B:   { index: 1, render: ['bit4', 'hex'] },
+            A:   { index: 0, render: ['bit4', 'dec_u8'] },
+            B:   { index: 1, render: ['bit4', 'dec_u8'] },
+        }
+    });
+    new Example(byId('add-3'), [
+        { action: 'set8 $A 255',        line: 'unsigned char a = 0xFF;' },
+        { action: 'set8 $B &$A',        line: 'char b = a;' },
+        { action: 'nop', line: ''},
+    ], [
+        new StackComponent({ start: 0, size: 8 }),
+        new FlagsComponent(),
+        new CodeComponent(),
+    ], {
+        availableFlags: CpuFlags,
+        stackSize: 8,
+        stackLabels: {
+            A:   { index: 0, render: ['hex', 'dec_u8'] },
+            B:   { index: 1, render: ['hex', 'dec_s8'] },
         }
     });
 </script>

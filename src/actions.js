@@ -188,9 +188,11 @@ class NegBitAction extends BaseAction {
             return;
         }
         const max = (1 << this.bits) - 1;
+        const flags = this.example.flags;
+        const newVal = (val & max) ^ max;
         flags.sign = Boolean(newVal >> (this.bits - 1));
         flags.zero = newVal == 0;
-        stack[toIndex] = (val & max) ^ max;
+        stack[toIndex] = newVal;
     }
 
 }

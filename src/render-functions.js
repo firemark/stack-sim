@@ -33,6 +33,21 @@ export default {
         return '0b' + val.toString(2).padStart(4, '0');
     },
 
+    dec_u8(val) {
+        if (typeof val !== 'number') {
+            return escapeVal(val);
+        }
+        return (val & 0xFF).toString();
+    },
+
+    dec_s8(val) {
+        if (typeof val !== 'number') {
+            return escapeVal(val);
+        }
+        const sign = val >> 7;
+        return (sign * -128 + (val & 0x7F)).toString();
+    },
+
     chr(val) {
         if (typeof val !== 'number') {
             return escapeVal(val);
