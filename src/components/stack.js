@@ -7,8 +7,8 @@ export default class StackComponent extends BaseComponent {
 
     constructor(options) {
         super();
-        this.element = makeEl('div', 'mem');
         options = options || {};
+        this.element = makeEl('div', options.long ? 'mem mem-long' : 'mem');
         var start = options.start !== undefined ? options.start : 0x2000;
         var size = options.size;
         this.options = {
@@ -118,14 +118,19 @@ export default class StackComponent extends BaseComponent {
             const index = item.dataset.index;
             const newValue = stack[index];
             const oldValue = oldStack[index];
-            const render = RENDER_FUNCTIONS[item.dataset.render];
-            const renderAlt = item.dataset.renderAlt !== '-' ? RENDER_FUNCTIONS[item.dataset.renderAlt] : null;
+            const render = RENDER_FUNCTIONS[item.dataset.render]
+                .bind(RENDER_FUNCTIONS);
+            const renderAlt = (
+                item.dataset.renderAlt !== '-'
+                ? RENDER_FUNCTIONS[item.dataset.renderAlt].bind(RENDER_FUNCTIONS)
+                : null
+            );
 
             function renderFull(val) {
                 let r = render(val);
                 if (renderAlt) {
                     const rAlt = renderAlt(val);
-                    r += `<small>(${rAlt})</small>`;
+                    return `<div>${r}<br /><small>(${rAlt})</small></div>`;
                 }
                 return r;
             }

@@ -1,3 +1,6 @@
+import { FLOAT_STANDARDS, FloatObj } from "@/float";
+
+
 class BaseAction {
     constructor(example, options) {
         this.example = example;
@@ -51,6 +54,10 @@ class OpAction extends BaseAction {
         };
     }
 
+    eval(a, b) {
+        return eval(`a ${this.op} b`);
+    }
+
     parseTwoVals(toIndex, val) {
         const stack = this.example.stack;
         const valueInStack = stack[toIndex];
@@ -70,12 +77,11 @@ class BinOpAction extends OpAction {
         if (isNaN(a) || isNaN(b)) {
             stack[toIndex] = '???';
         } else {
-            stack[toIndex] = eval(`a ${this.op} b`);
+            stack[toIndex] = this.eval(a, b);
         }
     }
 
 }
-
 
 class IfAction extends OpAction {
 
@@ -91,7 +97,7 @@ class IfAction extends OpAction {
         const trueStep = this.parseVal(trueIndex);
         const falseStep = this.parseVal(falseIndex);
 
-        const isTrue = eval(`a ${this.op} b`);
+        const isTrue = this.eval(a, b);
         const step = isTrue ? trueStep: falseStep;
         this.example.nextStep += step - 1;
     }
@@ -141,7 +147,7 @@ class BitAction extends OpAction {
             return;
         }
 
-        const preVal = eval(`a${this.op}b`);
+        const preVal = this.eval(a, b);
         const [newCarry, newVal] = this.toBits(preVal);
         const flags = this.example.flags;
         flags.carry = newCarry;
@@ -206,6 +212,7 @@ class AddBitAction extends BitAction {
 
 }
 
+
 class AdcBitAction extends AddBitAction {
 
     toBits(val) {
@@ -227,6 +234,86 @@ class SubBitAction extends AddBitAction {
         return [a, (b ^ max) + 1];
     }
 
+}
+
+
+class FloatAction extends BitAction {
+
+    constructor(example, options) {
+        super(example, options);
+        this.standard = FLOAT_STANDARDS[this.bits];
+        if (!this.standard) {
+            this.BOOM(`wrong number of bits: ${this.bits}`);
+        }
+    };
+
+}
+
+class AddFloatAction extends FloatAction {
+
+    eval(rawA, rawB) {
+        const a = FloatObj.fromBits(rawA, this.standard);
+        const b = FloatObj.fromBits(rawB, this.standard);
+
+        return this.floatAdd(a, b);
+    }
+
+    floatAdd(a, b) {
+        const expDiff = a.exp - b.exp;
+        const fractOne = 1 << this.standard.fractBits;
+        let fractA, fractB, fract, exp, sign;
+
+        if (expDiff == 0) {
+            fractA = fractOne + a.fract;
+            fractB = fractOne + b.fract;
+            exp = a.exp;
+        } else if (expDiff > 0) {
+            fractA = fractOne + a.fract;
+            fractB = (fractOne + b.fract) >> expDiff;
+            exp = a.exp;
+        } else {
+            fractA = (fractOne + a.fract) >> -expDiff;
+            fractB = fractOne + b.fract;
+            exp = b.exp;
+        }
+
+        if (a.sign != b.sign) {
+            if (fractA > fractB) {
+                sign = a.sign;
+                fract = fractA - fractB;
+            } else {
+                sign = b.sign;
+                fract = fractB - fractA;
+            }
+            if (fract == 0) {
+                exp = -this.standard.bias;
+            }
+        } else {
+            sign = a.sign;
+            fract = fractA + fractB - fractOne;
+            if (fract == 0 || fract >= fractOne) { // overflow
+                exp = exp + 1;
+            }
+        }
+
+        fract = fract - fractOne;
+        exp = exp & this.standard.expMask;
+
+        const result = new FloatObj(sign, exp, fract, this.standard);
+        return result.toBits();
+    }
+
+}
+
+class SubFloatAction extends AddFloatAction {
+
+    eval(rawA, rawB) {
+        const a = FloatObj.fromBits(rawA, this.standard);
+        const b = FloatObj.fromBits(rawB, this.standard);
+        b.sign = !b.sign;
+
+        return this.floatAdd(a, b);
+    }
 }
 
 const SIMPLE_ACTIONS = {
@@ -254,11 +341,15 @@ const BIT_ACTIONS = {
     or: BitAction.mixin('|'),
     and: BitAction.mixin('&'),
     xor: BitAction.mixin('^'),
+    right: BitAction.mixin('>>'),
+    left: BitAction.mixin('<<'),
     neg: NegBitAction,
+    fadd: AddFloatAction,
+    fsub: SubFloatAction,
 };
 
 export default function getAction(actionName, example) {
-    const bitActionMatch = actionName.match(/^(\w+)(\d+)$/);
+    const bitActionMatch = actionName.match(/^([a-z]+)(\d+)$/);
     if (bitActionMatch) {
         const [,bitActionName, bits] = bitActionMatch;
         const bitCls = BIT_ACTIONS[bitActionName];

@@ -9,23 +9,25 @@
 <p>
     Najpierw nalezy wyjasnić, że zależnie od systemu, liczbę można zapisać na wiele sposobów.
     Jest ich sporo, weźmy sobie liczbę <strong>65</strong> możemy przedstawić jako:
-    <table style="{margin: auto;}">
-        <tr>
-            <td>65</td>
-            <td>LXV</td>
-            <td>٦٥</td>
-        </tr>
-        <tr>
-            <td><img src="static/babilon.png" /></td>
-            <td>🍎</td>
-            <td>A</td>
-        </tr>
-        <tr>
-            <td>0b1000001</td>
-            <td>0x41</td>
-            <td>0o101</td>
-        </tr>
-    </table>
+    <div class="center-block">
+        <table class="table table-center">
+            <tr>
+                <td>65</td>
+                <td>LXV</td>
+                <td>٦٥</td>
+            </tr>
+            <tr>
+                <td>0b1000001</td>
+                <td>0x41</td>
+                <td>0o101</td>
+            </tr>
+            <tr>
+                <td><img src="static/babilon.png" /></td>
+                <td>🍎</td>
+                <td>A</td>
+            </tr>
+        </table>
+    </div>
 </p>
 
 <p>
@@ -47,7 +49,7 @@
     Zacznijmy najpierw od dodatnich całkowitych, a tak naprawdę od jednego oraz dwóch bitów by zrozumieć jak działa zapisywanie oraz dodawanie.
     Bit ma dwie wartości:
     <ul>
-        <li>wysoki (<b>H</b> lub <b>1</b> </li>
+        <li>wysoki (<b>H</b> lub <b>1</b>) </li>
         <li>oraz niski (<b>L</b> lub <b>0</b>) </li>
         <li>stosowany w elektronice - wysokiej impedancji - używa się go gdy wejście nie jest do niczego podłączone </li>
     </ul>
@@ -159,11 +161,12 @@ Niestety ze wględu, że liczby całkowite są w stanie się przekręcić jak li
 <p> Ok, a co z liczbami ujemnymi? </p>
 
 <p>
-    Sposobów są kilka, najpopularniejszy dla liczb całkowitych jest zapis 2C:
+    Sposobów są kilka, najpopularniejszy dla liczb całkowitych jest zapis 2C (U2):
     <ol>
         <li>Najstarszy bit jest bitem znaku (<b>0</b> to dodatnia, <b>1</b> to ujemna)</li>
         <li>Najstarszy bit ma wagę -2ⁿ⁻¹</li>
         <li>Pozostałe bity są liczone jak w poprzednim systemie</li>
+        <li>Odwrócenie znaku robi się przez inwersję wszystkich bitów - 1</li>
         <li>Dodawanie oraz odejmowanie liczy się tak samo jak w systemie nieznakowym</li>
         <li><a href="https://eduinf.waw.pl/inf/alg/006_bin/0018.php">Więcej tutaj</a>
     </ol>
@@ -246,8 +249,8 @@ Niestety ze wględu, że liczby całkowite są w stanie się przekręcić jak li
         availableFlags: CpuFlags,
         stackSize: 8,
         stackLabels: {
-            A:   { index: 0, render: ['hex', 'dec_u8'] },
-            B:   { index: 1, render: ['hex', 'dec_s8'] },
+            A:   { index: 0, render: ['bit8', 'dec_u8'] },
+            B:   { index: 1, render: ['bit8', 'dec_s8'] },
         }
     });
 </script>

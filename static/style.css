@@ -2,10 +2,31 @@ body {
     font-family: monospace;
     color: #2D383A;
 }
+
 .center {
     text-align: center;
     width: 100%;
 }
+
+.center-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.table td, .table th {
+    border: 1px solid black;
+    padding: 8px;
+}
+
+.table-center td, .table-center th {
+    text-align: center;
+}
+
+.table {
+    border-collapse: collapse;
+}
+
 .example {
     width: 900px;
 }
@@ -23,6 +44,9 @@ body {
     width: 100%;
     background-color: #C8C8CD;
 }
+.mem-long {
+    width: 500px;
+}
 .mem > .cell-label {
     width: 100%;
     background-color: #C8C8CD;
@@ -30,7 +54,6 @@ body {
     font-weight: bold;
     border-bottom: 1px solid black;
 }
-
 .mem > .cell:nth-child(odd) {
     background-color: #D8D8DD;
 }
@@ -55,7 +78,8 @@ body {
 }
 .cell-val > .old { color: #0066CC; }
 .cell-val > .new { color: #63B76C; }
-.cell-val > .arrow { font-weight: bold; }
+.cell-val > .arrow { font-weight: bold; width: 50px; }
+
 .code {
     flex: 1;
     background-color: #C8C8CD;

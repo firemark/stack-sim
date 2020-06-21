@@ -1,8 +1,12 @@
+import { FLOAT_STANDARDS, FloatObj } from "@/float";
+
+
 export default class Parser {
 
     constructor(example) {
         this.example = example;
         this.rules = [
+            { rule: /(\d+).(\d+)F(\d+)/g, cb: this.parseFloat },
             { rule: /\$([\w_]+)/g, cb: this.parseVariable },
             { rule: /(&+\d+)/g, cb: this.parsePointer },
             { rule: /(\d+)([+-])(\d+)/g, cb: this.parseOffset },
@@ -57,7 +61,18 @@ export default class Parser {
         return this.example.options.parseVal(val);
     }
 
-    parseVariable({step, options, boom}, labelName) {
+    parseFloat(_, a, b, bits) {
+        const standard = FLOAT_STANDARDS[bits];
+
+        if (!standard) {
+            this.BOOM(`wrong number of bits: ${bits}`);
+        }
+
+        const number = parseFloat(`${a}.${b}`);
+        return FloatObj.fromFloat(number, standard).toBits();
+    }
+
+    parseVariable({step, options}, labelName) {
         if (labelName === '_STEP') {
             return (step + 1).toString();
         }
@@ -75,7 +90,7 @@ export default class Parser {
         return this.pointerFromStack(stack, val.replace(/\^/g, '&')).toString();
     }
 
-    parseOffset({ boom }, indexRaw, sign, offsetRaw) {
+    parseOffset(_, indexRaw, sign, offsetRaw) {
         const index = parseInt(indexRaw);
         let offset = parseInt(offsetRaw);
         if (sign === '-') offset = -offset;

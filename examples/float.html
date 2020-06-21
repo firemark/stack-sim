@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% set title = "Liczby zmiennoprzecinkowe" %}
+{% block content %}
+
+<p>
+    Jak już rozumiemy jak się dodaje liczby, to czas na zmiennoprzecinkowe.
+</p>
+
+<p>
+    Liczby zmiennoprzecinkowe mają sporo zalet - nie jesteśmy ograniczeni ilością bitów - możemy robić operacje na takich liczbach jak 1123.44 czy 0.123132. Daje to spore możliwości, zwłaszcza w grafice komputerowej, obliczeniach, statystyce etc. Ale nie dla pieniędzy - to zostanie wyjaśnione poniżej.
+</p>
+
+<p>
+    Matematycznie możemy zapisać liczbę tak:
+
+    <br />X = 2ⁿ·[1.0 + M]
+    <br /> gdzie X to liczba, N to wykładnik, a M to mantysa (w komórce pamięci zapisujemy resztę z liczby)
+</p>
+
+<p>
+    Przykład :Liczbę dziesiętną 30.0625 możemy zapisać wykładniczo jako (1.0 + 2.00625) · 10¹
+</p>
+
+<p>
+    gdzie 10 to baza, ¹ to wykładnik, a 2.00625 to mantysa
+</p>
+
+<p>
+    Binarnie możemy zapisać 30.0625 = 11110.0001<small>(2)</small>
+</p>
+
+<p>
+    Co daje nam w wykładniczym [1.0<small>(2)</small> + 0.11100001<small>(2)</small>] · 2⁴
+</p>
+
+<p>
+    Jak się domyślamy - komórka pamięci nie ma cos jak kropka czy przecinek, więc musimy to zapisać tak:
+
+    <table class="table table-center">
+        <tr>
+            <th>S</th>
+            <th>EEEEE</th>
+            <th>MMMMMMMMMM</th>
+        </tr>
+        <tr>
+            <td>0</td>
+            <td>00011</td>
+            <td>1110000100</td>
+        </tr>
+        <tr>
+            <td>+</td>
+            <td>2⁴ ·</td>
+            <td>(1.0 + 900/1024)</td>
+        </tr>
+    </table>
+</p>
+
+<p>
+    Pierwszy bit to bit znaku - 0 to +, 1 to - (jak w zapisie U2)
+    <br /> bity EEEEEE to Wykładnik. (w formacie IEEE754 wykładnik jest przesunięty o jakąś wartość, dla formatu pojedynczej precyzji wykładnik 0 to wartość 127)
+    <br /> bity MMMMMM to Mantysa.
+</p>
+
+<p>
+    Liczby zmiennoprzecinkowe są już stare - pierwsze użycie liczb zmiennoprzecinkowych stosowano już przed drugą wojną światową (!), a sam standard ma już 40 lat. Więcej <a href="https://eduinf.waw.pl/inf/alg/006_bin/0022.php" target="_blank">tutaj</a>
+</p>
+
+<p>
+    Sam format liczby jest dość zaawansowany, poza liczbami są wartości specjalne takie jak +0, -0 (matko z córką), a sam format liczby wygląda tak:
+
+    <div class="table-center">
+        <img src="./static/ieee754.png" />
+    </div>
+</p>
+
+<p>
+    Standard IEEE 754 opisuje liczby pierwszej oraz drugiej precyzji. My dla przykładów będziemy stosować "połówkową" precyzję, do 16 bitów.
+</p>
+
+<div id="float-1"></div>
+
+Analogicznie liczby po przecinku:
+
+<div id="float-2"></div>
+
+{% endblock %}
+{% block script %}
+<script>
+    new Example(byId('float-1'), [
+        { action: 'set16 $A 1.0F16',               line: 'float a = 1.0;' },
+        { action: 'set16 $B 7.0F16',               line: 'float b = 7.0;' },
+        { action: 'set16 $C &$A; fadd16 $C &$B',   line: 'float c = a + b;' },
+        { action: 'set16 $D &$A; fsub16 $D &$B',   line: 'float d = a - b;' },
+        { action: 'set16 $ZERO &$B; fsub16 $ZERO &$B',
+            line: 'float zero = b - b;' },
+        { action: 'nop', line: ''},
+    ], [
+        new StackComponent({ start: 0, size: 8, long: true }),
+        new CodeComponent(),
+    ], {
+        stackSize: 8,
+        availableFlags: CpuFlags,
+        stackLabels: {
+            A:    { index: 0, render: ['bit16f', 'float16'] },
+            B:    { index: 1, render: ['bit16f', 'float16'] },
+            C:    { index: 2, render: ['bit16f', 'float16'] },
+            D:    { index: 3, render: ['bit16f', 'float16'] },
+            ZERO: { index: 4, render: ['bit16f', 'float16'] },
+        }
+    });
+
+    new Example(byId('float-2'), [
+        { action: 'set16 $A 0.1F16',               line: 'float a = 0.1;' },
+        { action: 'set16 $B 0.2F16',               line: 'float b = 0.2;' },
+        { action: 'set16 $C 0.3F16',               line: 'float c = 0.3;' },
+        { action: 'set16 $D &$A; fadd16 $D &$B',   line: 'float d = a + b;' },
+        { action: 'nop', line: ''},
+    ], [
+        new StackComponent({ start: 0, size: 8, long: true }),
+        new CodeComponent(),
+    ], {
+        stackSize: 8,
+        availableFlags: CpuFlags,
+        stackLabels: {
+            A:    { index: 0, render: ['bit16f', 'float16'] },
+            B:    { index: 1, render: ['bit16f', 'float16'] },
+            C:    { index: 2, render: ['bit16f', 'float16'] },
+            D:    { index: 3, render: ['bit16f', 'float16'] },
+        }
+    });
+</script>
+{% endblock %}
