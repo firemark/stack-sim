@@ -7,30 +7,41 @@
 </p>
 
 <p>
-    Liczby zmiennoprzecinkowe mają sporo zalet - nie jesteśmy ograniczeni ilością bitów - możemy robić operacje na takich liczbach jak 1123.44 czy 0.123132. Daje to spore możliwości, zwłaszcza w grafice komputerowej, obliczeniach, statystyce etc. Ale nie dla pieniędzy - to zostanie wyjaśnione poniżej.
+Liczby zmiennoprzecinkowe mają sporo zalet - nie jesteśmy ograniczeni ilością bitów - możemy robić operacje na takich liczbach jak <em>1123.44</em> czy <em>0.123132</em>. Daje to spore możliwości, zwłaszcza w grafice komputerowej, obliczeniach, statystyce etc. Ale nie dla pieniędzy - to zostanie wyjaśnione poniżej.
 </p>
 
 <p>
-    Matematycznie możemy zapisać liczbę tak:
+    Wykładniczo możemy zapisać liczbę tak:
+    <br />
+    <br /> <em>X = 10ⁿ · M</em>
+    <br /> gdzie <em>X</em> to liczba, <em>n</em> to wykładnik, a <em>M</em> to mantysa (liczba w zakresie <em>[1.0;10.0]</em>)
+</p>
 
-    <br />X = 2ⁿ·[1.0 + M]
-    <br /> gdzie X to liczba, N to wykładnik, a M to mantysa (w komórce pamięci zapisujemy resztę z liczby)
+<hr />
+
+<p>
+    Przykład: Liczbę dziesiętną <em>30.0625</em> możemy zapisać wykładniczo jako:
+    <em>3.00625 · 10¹</em>
+
 </p>
 
 <p>
-    Przykład :Liczbę dziesiętną 30.0625 możemy zapisać wykładniczo jako (1.0 + 2.00625) · 10¹
+    gdzie <em>10</em> to baza, <em>¹</em> to wykładnik, a <em>3.00625</em> to mantysa
 </p>
 
 <p>
-    gdzie 10 to baza, ¹ to wykładnik, a 2.00625 to mantysa
+    Binarnie w komórce pamięci możemy zapisać tak:
+    <br />
+    <br /> <em>X = 2ⁿ · (1.0 + M)</em>
+    <br /> gdzie <em>M</em> jest w zakresie <em>[0.0;1.0]</em> - jeżeli najmniejsza liczba mantysy jest 1.0 to możemy w zapisie pominąć jedynkę (zaoszczędzimy aż jeden bit!!) i jedynie pamiętać o niej w obliczeniach.
 </p>
 
 <p>
-    Binarnie możemy zapisać 30.0625 = 11110.0001<small>(2)</small>
+    Binarnie możemy zapisać <em>30.0625</em> = <em>11110.0001<small>(2)</small></em>
 </p>
 
 <p>
-    Co daje nam w wykładniczym [1.0<small>(2)</small> + 0.11100001<small>(2)</small>] · 2⁴
+    Co daje nam w wykładniczym <em>[1.0<small>(2)</small> + 0.11100001<small>(2)</small>] · 2⁴</em>
 </p>
 
 <p>
@@ -48,18 +59,87 @@
             <td>1110000100</td>
         </tr>
         <tr>
-            <td>+</td>
-            <td>2⁴ ·</td>
-            <td>(1.0 + 900/1024)</td>
+            <td><em>+</em></td>
+            <td><em>2⁴ ·</em></td>
+            <td><em>(1.0 + 900/1024)</em></td>
         </tr>
     </table>
 </p>
 
 <p>
-    Pierwszy bit to bit znaku - 0 to +, 1 to - (jak w zapisie U2)
-    <br /> bity EEEEEE to Wykładnik. (w formacie IEEE754 wykładnik jest przesunięty o jakąś wartość, dla formatu pojedynczej precyzji wykładnik 0 to wartość 127)
-    <br /> bity MMMMMM to Mantysa.
+    Pierwszy bit to bit znaku. 0 to <strong>+</strong>; 1 to <strong>-</strong> (jak w zapisie U2)
+    <br /> bity <strong>EEEEEE</strong> to Wykładnik. (w formacie IEEE754 wykładnik jest przesunięty o jakąś wartość, dla formatu pojedynczej precyzji wykładnik 0 to wartość 127)
+    <br /> bity <strong>MMMMMM</strong> to Mantysa.
 </p>
+
+<p>
+    Wykładnik wymaga wyjaśnienia przy pomocy tabelki:
+
+    <div class="center-block">
+        <table class="table table-center">
+            <tr>
+                <th>Bity</th>
+                <th>Wartość</th>
+                <th>Wartość - BIAS<small>(15)</small></th>
+                <th>Użycie</th>
+            </tr>
+            <tr>
+                <td>00000</td>
+                <td>0</td>
+                <td>-15</td>
+                <td>subnormal, -0, +1</td>
+            </tr>
+            <tr>
+                <td>00001</td>
+                <td>1</td>
+                <td>-14</td>
+            </tr>
+            <tr>
+                <td>00010</td>
+                <td>2</td>
+                <td>-13</td>
+            </tr>
+            <tr>
+                <td>…</td>
+                <td>…</td>
+                <td>…</td>
+            </tr>
+            <tr>
+                <td>01111</td>
+                <td>15</td>
+                <td>0</td>
+            </tr>
+            <tr>
+                <td>10000</td>
+                <td>16</td>
+                <td>1</td>
+            </tr>
+            <tr>
+                <td>10001</td>
+                <td>17</td>
+                <td>2</td>
+            </tr>
+            <tr>
+                <td>…</td>
+                <td>…</td>
+                <td>…</td>
+            </tr>
+            <tr>
+                <td>11110</td>
+                <td>30</td>
+                <td>15</td>
+            </tr>
+            <tr>
+                <td>11111</td>
+                <td>31</td>
+                <td>16</td>
+                <td>±∞, NaN</td>
+            </tr>
+        </table>
+    </div>
+</p>
+
+
 
 <p>
     Liczby zmiennoprzecinkowe są już stare - pierwsze użycie liczb zmiennoprzecinkowych stosowano już przed drugą wojną światową (!), a sam standard ma już 40 lat. Więcej <a href="https://eduinf.waw.pl/inf/alg/006_bin/0022.php" target="_blank">tutaj</a>
@@ -74,25 +154,55 @@
 </p>
 
 <p>
-    Standard IEEE 754 opisuje liczby pierwszej oraz drugiej precyzji. My dla przykładów będziemy stosować "połówkową" precyzję, do 16 bitów.
+    Standard IEEE 754 opisuje liczby pierwszej oraz drugiej precyzji. My dla przykładów będziemy stosować "połówkową" precyzję, do 16 bitów. Więcej teorii <a href="https://en.wikipedia.org/wiki/Half-precision_floating-point_format" target="_blank">tutaj</a>.
 </p>
 
 <div id="float-1"></div>
 
-Analogicznie liczby po przecinku:
+<p>
+    Możemy zauważyć, że wynik b - b to… -0.0. Wynika to z tego, że na format liczby każda wartość mantysa może zostać odwrócona, w tym i 0.0.
+</p>
+
+<p>
+    Jak już tak dobrze idzie - spróbujmy przykładu z większymi liczbami:
+</p>
 
 <div id="float-2"></div>
+
+<p>
+    Błąd w obliczeniach wynika z tego, że liczba jest dość duża, więc wykładnik został powiększony, kosztem strat bitów w mantysie. Zdaje się, że to jest mały koszt względem tego, jak dużą możemy mieć liczbę, ale czyżby? Niewiedza tego może kosztować… pluton wojskowy. Więcej historii <a href="http://www-users.math.umn.edu/~arnold//disasters/patriot.html" target="_blank">tutaj</a>.
+
+    <br />
+    Rozwiązaniem tego problemu może być większa precyzja liczby lub zrezygnowanie z liczb zmiennoprzecinkowych.
+</p>
+
+<div id="float-3"></div>
+
+<p>
+    Tutaj akurat błąd wynosi z tego, że nie da się w systemie binarnym zapisać liczby 0.1 czy 0.7 - zostanie ona zapisana w zaokrągleniu. I zależnie od strategii zaokrąglenia oraz operacji - wynik może się rożnić w dalszych rozwinięciach liczby. Dlatego nie można porównywać liczb zmiennoprzecinkowych, można jedynie sprawdzać czy różnica tych liczb jest wystarczająco mała.
+</p>
+
+<p>
+    Ok, a co z pieniążkami i grosikami? przecież jak mamy liczbę z przecinkiem, to ona powinna być, tak? Otóż nie. Mamy kilka lepszych rozwiązań do liczenia liczb:
+
+    <ol>
+        <li>Liczenie w groszach/centach. jako liczba całkowita (integer). No po cholere ci 0.0003 złotego?</li>
+        <li>A jezeli grasz na gieldzie to możesz zapisywać jedną tysięczną grosza jako najmniejszą liczbę</li>
+        <li>Korzystanie z typów obsługujące obliczenia na systemie 10 - w Pythonie to jest biblioteka Decimal, w bazach danych są osobne typy kolumn etc. </li>
+    </ol>
+
+</p>
 
 {% endblock %}
 {% block script %}
 <script>
     new Example(byId('float-1'), [
-        { action: 'set16 $A 1.0F16',               line: 'float a = 1.0;' },
-        { action: 'set16 $B 7.0F16',               line: 'float b = 7.0;' },
-        { action: 'set16 $C &$A; fadd16 $C &$B',   line: 'float c = a + b;' },
-        { action: 'set16 $D &$A; fsub16 $D &$B',   line: 'float d = a - b;' },
+        { action: 'set16 $A 1.0F16',               line: 'halt_float a = 1.0;' },
+        { action: 'set16 $B 7.0F16',               line: 'halt_float b = 7.0;' },
+        { action: 'set16 $C &$A; fadd16 $C &$B',   line: 'halt_float c = a + b;' },
+        { action: 'set16 $D &$A; fsub16 $D &$B',   line: 'halt_float d = a - b;' },
         { action: 'set16 $ZERO &$B; fsub16 $ZERO &$B',
-            line: 'float zero = b - b;' },
+            line: 'half_float zero = b - b;' },
         { action: 'nop', line: ''},
     ], [
         new StackComponent({ start: 0, size: 8, long: true }),
@@ -110,11 +220,32 @@ Analogicznie liczby po przecinku:
     });
 
     new Example(byId('float-2'), [
-        { action: 'set16 $A 0.1F16',               line: 'float a = 0.1;' },
-        { action: 'set16 $B 0.2F16',               line: 'float b = 0.2;' },
-        { action: 'set16 $C 0.3F16',               line: 'float c = 0.3;' },
-        { action: 'set16 $D &$A; fadd16 $D &$B',   line: 'float d = a + b;' },
-        { action: 'nop', line: ''},
+        { action: 'set16 $SUM 0.0F16',               line: 'half_float sum = 0.0;' },
+        { action: 'nop',                             line: 'int i;' },
+        { firstAction: 'set $i 0',
+          action: 'if< &$i 5 ? +1 +3',
+          line: 'for (i = 0; i < 5; i++) {' },
+        { action: 'fadd16 $SUM 200.25F16',          line: '  sum += 128.25;' },
+        { action: 'add $i 1; rjmp -3',              line: '}' },
+        { action: 'nop', line: '// 200.25 * 5 = 1001.25'},
+    ], [
+        new StackComponent({ start: 0, size: 8, long: true }),
+        new CodeComponent(),
+    ], {
+        stackSize: 8,
+        availableFlags: CpuFlags,
+        stackLabels: {
+            SUM:    { index: 0, render: ['bit16f', 'float16'] },
+            i:      { index: 1 },
+        }
+    });
+
+    new Example(byId('float-3'), [
+        { action: 'set16 $A 0.1F16',               line: 'half_float a = 0.1;' },
+        { action: 'set16 $B 0.7F16',               line: 'half_float b = 0.7;' },
+        { action: 'set16 $C 0.8F16',               line: 'half_float c = 0.8;' },
+        { action: 'set16 $D &$A; fadd16 $D &$B',   line: 'half_float d = a + b;' },
+        { action: 'nop', line: '// dlaczego nie c == d?'},
     ], [
         new StackComponent({ start: 0, size: 8, long: true }),
         new CodeComponent(),

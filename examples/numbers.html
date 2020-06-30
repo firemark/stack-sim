@@ -8,7 +8,7 @@
 
 <p>
     Najpierw nalezy wyjasnić, że zależnie od systemu, liczbę można zapisać na wiele sposobów.
-    Jest ich sporo, weźmy sobie liczbę <strong>65</strong> możemy przedstawić jako:
+    Jest ich sporo, weźmy sobie liczbę <em>65</em> możemy przedstawić jako:
     <div class="center-block">
         <table class="table table-center">
             <tr>
@@ -77,7 +77,25 @@
 <div id="logic-operators"></div>
 
 <p>
-Ok, jak już rozumiemy podstawowe operacje, to czas przejść jak działa dodawanie. Najpierw trochę matematyki w systemie binarnym <a href="https://eduinf.waw.pl/inf/alg/006_bin/0010.php">(więcej tutaj o liczbach)</a>:
+    Ok, jak już rozumiemy podstawowe operacje, czas zrozumieć jak możemy zapisać liczbę. Przypomnijmy sobie jak wygląda to w systemie dziesiętnym:
+    <br /><br />
+    <em>
+        1023<small>(10)</small>
+        = 1·10³ + 0·10² + 2·10¹ + 3·10⁰
+    </em>
+    <br /><br />
+    Tak samo możemy zapisac binarnie liczby, tylko zamiast liczb 0-9 oraz podstawy 10, będziemy mieć liczby 0-1 oraz podstawę 2:
+    <br /><br />
+    <em>
+        1010<small>(2)</small>
+        = 1·2³ + 0·2² + 1·2¹ + 0·2⁰ = 1·8 + 0·4 + 1·2 + 0·1 = 8 + 2
+        = 10<small>(10)</small>
+    </em>
+</p>
+
+<p>
+     To czas przejść jak działa dodawanie. Najpierw trochę matematyki w systemie binarnym
+     <a href="https://eduinf.waw.pl/inf/alg/006_bin/0010.php">(więcej tutaj o liczbach)</a>:
 
     <ul>
         <li>x + y = cs</li>
@@ -166,11 +184,77 @@ Niestety ze wględu, że liczby całkowite są w stanie się przekręcić jak li
         <li>Najstarszy bit jest bitem znaku (<b>0</b> to dodatnia, <b>1</b> to ujemna)</li>
         <li>Najstarszy bit ma wagę -2ⁿ⁻¹</li>
         <li>Pozostałe bity są liczone jak w poprzednim systemie</li>
-        <li>Odwrócenie znaku robi się przez inwersję wszystkich bitów - 1</li>
+        <li>Odwrócenie znaku robi się przez inwersję wszystkich bitów i odjęcie 1</li>
         <li>Dodawanie oraz odejmowanie liczy się tak samo jak w systemie nieznakowym</li>
         <li><a href="https://eduinf.waw.pl/inf/alg/006_bin/0018.php">Więcej tutaj</a>
     </ol>
 </p>
+
+<p>
+    Możemy porównać dwa systemy - nieznakowy oraz U2 (istnieją jeszcze inne ale to jest temat przy piwie)
+
+    <div class="center-block">
+        <table class="table table-center">
+            <tr>
+                <th>Bity</th>
+                <th>Beznakowy</th>
+                <th>U2</th>
+            </tr>
+            <tr>
+                <td>0000</td>
+                <td>0</td>
+                <td>0</td>
+            </tr>
+            <tr>
+                <td>0001</td>
+                <td>1</td>
+                <td>1</td>
+            </tr>
+            <tr>
+                <td>0010</td>
+                <td>2</td>
+                <td>2</td>
+            </tr>
+            <tr>
+                <td>…</td>
+                <td>…</td>
+                <td>…</td>
+            </tr>
+            <tr>
+                <td>0111</td>
+                <td>7</td>
+                <td>7</td>
+            </tr>
+            <tr>
+                <td>1000</td>
+                <td>8</td>
+                <td>-8</td>
+            </tr>
+            <tr>
+                <td>1001</td>
+                <td>9</td>
+                <td>-7</td>
+            </tr>
+            <tr>
+                <td>…</td>
+                <td>…</td>
+                <td>…</td>
+            </tr>
+            <tr>
+                <td>1110</td>
+                <td>14</td>
+                <td>-2</td>
+            </tr>
+            <tr>
+                <td>1111</td>
+                <td>15</td>
+                <td>-1</td>
+            </tr>
+        </table>
+    </div>
+</p>
+
+<p> No to przykładzik: </p>
 
 <div id="add-3"></div>
 

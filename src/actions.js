@@ -133,10 +133,11 @@ class BitAction extends OpAction {
     }
 
     toBits(val) {
-        const max = 1 << this.bits;
+        val = BigInt(val);
+        const max = 1n << BigInt(this.bits);
         const carry = Boolean(val & max);
-        const newVal = val & (max - 1);
-        return [carry, newVal];
+        const newVal = val & (max - 1n);
+        return [carry, Number(newVal)];
     }
 
     execute(toIndex, val) {
@@ -261,19 +262,20 @@ class AddFloatAction extends FloatAction {
     floatAdd(a, b) {
         const expDiff = a.exp - b.exp;
         const fractOne = 1 << this.standard.fractBits;
+        const carryBit = (fractOne << 1);
         let fractA, fractB, fract, exp, sign;
 
         if (expDiff == 0) {
-            fractA = fractOne + a.fract;
-            fractB = fractOne + b.fract;
+            fractA = fractOne | a.fract;
+            fractB = fractOne | b.fract;
             exp = a.exp;
         } else if (expDiff > 0) {
-            fractA = fractOne + a.fract;
-            fractB = (fractOne + b.fract) >> expDiff;
+            fractA = fractOne | a.fract;
+            fractB = (fractOne | b.fract) >> expDiff;
             exp = a.exp;
         } else {
-            fractA = (fractOne + a.fract) >> -expDiff;
-            fractB = fractOne + b.fract;
+            fractA = (fractOne | a.fract) >> -expDiff;
+            fractB = fractOne | b.fract;
             exp = b.exp;
         }
 
@@ -290,13 +292,16 @@ class AddFloatAction extends FloatAction {
             }
         } else {
             sign = a.sign;
-            fract = fractA + fractB - fractOne;
-            if (fract == 0 || fract >= fractOne) { // overflow
+            fract = fractA + fractB;
+
+            if (fract & carryBit) { // overflow
                 exp = exp + 1;
+                fract = (fract & (carryBit - 1)) >> 1;
             }
+
         }
 
-        fract = fract - fractOne;
+        fract = fract & this.standard.fractMask;
         exp = exp & this.standard.expMask;
 
         const result = new FloatObj(sign, exp, fract, this.standard);
